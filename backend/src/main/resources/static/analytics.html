@@ -688,8 +688,8 @@
   }
 
   function handleServiceUnavailable(res) {
+    const notice = document.getElementById('serviceNotice');
     if (res && res.status === 'UNAVAILABLE') {
-      const notice = document.getElementById('serviceNotice');
       if (notice) {
         notice.innerHTML = `
           <div class="analytics-banner analytics-banner-warning">
@@ -707,6 +707,9 @@
         `;
       }
       return true;
+    }
+    if (notice && res && res.status !== 'UNAVAILABLE') {
+      notice.innerHTML = '';
     }
     return false;
   }
@@ -1012,16 +1015,22 @@
       const data = await CMS.fetchApi('/api/analytics/advanced-plots');
       if (handleServiceUnavailable(data)) return;
 
-      if (data.correlationHeatmap) {
-        corrWrapper.innerHTML = `<img src="data:image/png;base64,${data.correlationHeatmap}" alt="Correlation Heatmap">`;
+      if (data && data.correlationHeatmap) {
+        const src = data.correlationHeatmap.startsWith('data:')
+          ? data.correlationHeatmap
+          : `data:image/png;base64,${data.correlationHeatmap}`;
+        corrWrapper.innerHTML = `<img src="${src}" alt="Correlation Heatmap" style="max-width:100%; height:auto; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.06);">`;
       } else {
-        corrWrapper.innerHTML = `<div style="color:var(--text-muted);">No plot available</div>`;
+        corrWrapper.innerHTML = `<div style="color:var(--text-muted); padding:30px;">No plot available</div>`;
       }
 
-      if (data.categoryBoxPlot) {
-        catWrapper.innerHTML = `<img src="data:image/png;base64,${data.categoryBoxPlot}" alt="Category Boxplot">`;
+      if (data && data.categoryBoxPlot) {
+        const src = data.categoryBoxPlot.startsWith('data:')
+          ? data.categoryBoxPlot
+          : `data:image/png;base64,${data.categoryBoxPlot}`;
+        catWrapper.innerHTML = `<img src="${src}" alt="Category Boxplot" style="max-width:100%; height:auto; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.06);">`;
       } else {
-        catWrapper.innerHTML = `<div style="color:var(--text-muted);">No plot available</div>`;
+        catWrapper.innerHTML = `<div style="color:var(--text-muted); padding:30px;">No plot available</div>`;
       }
     } catch (err) {
       console.warn('Plots error:', err);
