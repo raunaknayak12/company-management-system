@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CMS — Corporate Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<div class="app-container">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo-icon"><i class="fa-solid fa-cube"></i></div>
+      <div>
+        <div class="sidebar-brand-name">CMS Portal</div>
+        <div class="sidebar-brand-sub">Enterprise Suite</div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section-title">Core Management</div>
+      <a href="index.html" class="nav-link active"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+      <a href="employees.html" class="nav-link" data-role="ADMIN,MANAGER"><i class="fa-solid fa-id-badge"></i> Employees</a>
+      <a href="departments.html" class="nav-link"><i class="fa-solid fa-sitemap"></i> Departments</a>
+      <a href="projects.html" class="nav-link"><i class="fa-solid fa-diagram-project"></i> Projects</a>
+
+      <div class="nav-section-title">Commercial & CRM</div>
+      <a href="customers.html" class="nav-link" data-role="ADMIN,MANAGER"><i class="fa-solid fa-users"></i> Customers</a>
+      <a href="products.html" class="nav-link"><i class="fa-solid fa-box-archive"></i> Products</a>
+      <a href="orders.html" class="nav-link"><i class="fa-solid fa-cart-shopping"></i> Sales Orders</a>
+      <a href="feedback.html" class="nav-link" data-role="ADMIN,MANAGER"><i class="fa-solid fa-comment-dots"></i> Feedback</a>
+
+      <div class="nav-section-title" data-role="ADMIN,MANAGER">Intelligence & Admin</div>
+      <a href="analytics.html" class="nav-link" data-role="ADMIN,MANAGER"><i class="fa-solid fa-chart-line"></i> Analytics & BI</a>
+      <a href="my-performance.html" class="nav-link" data-role="EMPLOYEE"><i class="fa-solid fa-trophy"></i> My Performance</a>
+      <a href="users.html" class="nav-link" data-role="ADMIN"><i class="fa-solid fa-user-gear"></i> System Users</a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-badge">
+        <div class="user-avatar" id="sidebarUserAvatar">A</div>
+        <div class="user-info-text">
+          <div class="user-name-label" id="sidebarUserName">Loading...</div>
+          <div class="user-role-pill" id="sidebarUserRole">ADMIN</div>
+        </div>
+      </div>
+      <button class="btn-logout" title="Sign out" onclick="CMS.logout()"><i class="fa-solid fa-right-from-bracket"></i></button>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-wrapper">
+    <header class="top-navbar">
+      <div class="page-title-area">
+        <h1>Executive Command Center</h1>
+        <p>Operational telemetry, revenue tracking, and cross-department status</p>
+      </div>
+      <div class="top-actions">
+        <a href="orders.html" class="btn btn-primary btn-sm"><i class="fa-solid fa-plus"></i> New Order</a>
+        <a href="analytics.html" class="btn btn-outline btn-sm" data-role="ADMIN,MANAGER"><i class="fa-solid fa-chart-pie"></i> Open Analytics</a>
+      </div>
+    </header>
+
+    <div class="content-body">
+      <!-- KPI Cards -->
+      <div class="stats-grid">
+        <div class="stat-card stat-card-border-primary">
+          <div class="stat-header">
+            <span class="stat-label">Total Revenue</span>
+            <div class="stat-icon stat-icon-primary"><i class="fa-solid fa-dollar-sign"></i></div>
+          </div>
+          <div class="stat-value" id="kpiRevenue">$0.00</div>
+          <div class="stat-subtext"><i class="fa-solid fa-arrow-trend-up" style="color:var(--success)"></i> Enterprise sales gross</div>
+        </div>
+
+        <div class="stat-card stat-card-border-success">
+          <div class="stat-header">
+            <span class="stat-label">Total Orders</span>
+            <div class="stat-icon stat-icon-success"><i class="fa-solid fa-cart-check"></i></div>
+          </div>
+          <div class="stat-value" id="kpiOrders">0</div>
+          <div class="stat-subtext"><span id="kpiDelivered">0</span> fully fulfilled</div>
+        </div>
+
+        <div class="stat-card stat-card-border-warning">
+          <div class="stat-header">
+            <span class="stat-label">Active Headcount</span>
+            <div class="stat-icon stat-icon-warning"><i class="fa-solid fa-user-group"></i></div>
+          </div>
+          <div class="stat-value" id="kpiEmployees">0</div>
+          <div class="stat-subtext"><span id="kpiDepartments">0</span> corporate departments</div>
+        </div>
+
+        <div class="stat-card stat-card-border-info">
+          <div class="stat-header">
+            <span class="stat-label">Customer Satisfaction</span>
+            <div class="stat-icon stat-icon-info"><i class="fa-solid fa-star"></i></div>
+          </div>
+          <div class="stat-value" id="kpiCsat">4.8 / 5</div>
+          <div class="stat-subtext"><span id="kpiFeedbackCount">0</span> client reviews</div>
+        </div>
+      </div>
+
+      <!-- Quick Action Shortcuts -->
+      <div class="card-box">
+        <div class="card-box-header">
+          <h2 class="card-box-title"><i class="fa-solid fa-bolt" style="color:var(--warning)"></i> Accelerated Operations</h2>
+        </div>
+        <div class="card-box-body" style="display:flex; gap:16px; flex-wrap:wrap;">
+          <a href="orders.html" class="btn btn-outline"><i class="fa-solid fa-file-invoice-dollar" style="color:var(--primary)"></i> Create Sales Order</a>
+          <a href="employees.html" class="btn btn-outline" data-role="ADMIN"><i class="fa-solid fa-user-plus" style="color:var(--success)"></i> Add New Employee</a>
+          <a href="projects.html" class="btn btn-outline"><i class="fa-solid fa-folder-plus" style="color:var(--secondary)"></i> Initialize Project</a>
+          <a href="analytics.html" class="btn btn-outline" data-role="ADMIN,MANAGER"><i class="fa-solid fa-brain" style="color:purple"></i> Run ML Forecast</a>
+          <a href="feedback.html" class="btn btn-outline" data-role="ADMIN,MANAGER"><i class="fa-solid fa-comments" style="color:#f59e0b"></i> Review CSAT Sentiment</a>
+        </div>
+      </div>
+
+      <!-- Two column: Recent Orders & Customer Reviews -->
+      <div style="display:grid; grid-template-columns: 2fr 1fr; gap:24px;">
+        <!-- Recent Orders -->
+        <div class="card-box">
+          <div class="card-box-header">
+            <h2 class="card-box-title"><i class="fa-solid fa-clock-rotate-left"></i> Recent Sales Orders</h2>
+            <a href="orders.html" class="btn btn-outline btn-sm">View All Orders</a>
+          </div>
+          <div class="card-box-body" style="padding:0;">
+            <table class="custom-table">
+              <thead>
+                <tr>
+                  <th>Order No</th>
+                  <th>Customer</th>
+                  <th>Total</th>
+                  <th>Status</th>
+                  <th>Date</th>
+                </tr>
+              </thead>
+              <tbody id="recentOrdersBody">
+                <tr><td colspan="5" style="text-align:center; padding:30px; color:var(--text-muted);">Loading active transactions...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Recent Customer Feedback -->
+        <div class="card-box">
+          <div class="card-box-header">
+            <h2 class="card-box-title"><i class="fa-solid fa-star-half-stroke" style="color:var(--warning)"></i> Customer Voice</h2>
+            <a href="feedback.html" class="btn btn-outline btn-sm" data-role="ADMIN,MANAGER">Reviews</a>
+          </div>
+          <div class="card-box-body" id="feedbackFeed">
+            <div style="text-align:center; color:var(--text-muted); padding:30px;">Loading sentiment feed...</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="/js/app.js"></script>
+<script>
+  async function loadDashboard() {
+    try {
+      // 1. Fetch Orders
+      const orders = await CMS.fetchApi('/api/orders');
+      if (orders && orders.length) {
+        let rev = 0;
+        let delivered = 0;
+        orders.forEach(o => {
+          rev += (o.totalAmount || 0);
+          if (o.status === 'DELIVERED') delivered++;
+        });
+        document.getElementById('kpiRevenue').textContent = CMS.formatCurrency(rev);
+        document.getElementById('kpiOrders').textContent = orders.length;
+        document.getElementById('kpiDelivered').textContent = delivered;
+
+        const tbody = document.getElementById('recentOrdersBody');
+        tbody.innerHTML = '';
+        orders.slice(0, 5).forEach(o => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td><strong>${o.orderNumber}</strong></td>
+            <td>${o.customerName || 'Customer'}</td>
+            <td><strong>${CMS.formatCurrency(o.totalAmount)}</strong></td>
+            <td>${CMS.getStatusBadge(o.status)}</td>
+            <td>${CMS.formatDate(o.orderDate)}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      }
+
+      // 2. Fetch Departments & Employees
+      const depts = await CMS.fetchApi('/api/departments');
+      if (depts) {
+        document.getElementById('kpiDepartments').textContent = depts.length;
+      }
+
+      const user = CMS.getUser();
+      if (user && user.role !== 'EMPLOYEE') {
+        const emps = await CMS.fetchApi('/api/employees');
+        if (emps) {
+          document.getElementById('kpiEmployees').textContent = emps.length;
+        }
+
+        // 3. Fetch Feedback
+        const feedbacks = await CMS.fetchApi('/api/feedback');
+        if (feedbacks && feedbacks.length) {
+          document.getElementById('kpiFeedbackCount').textContent = feedbacks.length;
+          let sumRating = 0;
+          feedbacks.forEach(f => sumRating += f.rating);
+          const avg = (sumRating / feedbacks.length).toFixed(1);
+          document.getElementById('kpiCsat').textContent = `${avg} / 5`;
+
+          const renderStars = (rating) => {
+            let s = '';
+            for (let i = 1; i <= 5; i++) {
+              const isFilled = i <= rating;
+              s += `<svg style="width:13px;height:13px;vertical-align:-1px;margin-right:2px;" viewBox="0 0 24 24" fill="${isFilled ? '#f59e0b' : 'none'}" stroke="#f59e0b" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>`;
+            }
+            return s;
+          };
+
+          feedEl.innerHTML = '';
+          feedbacks.slice(0, 4).forEach(f => {
+            const item = document.createElement('div');
+            item.style.marginBottom = '16px';
+            item.style.paddingBottom = '12px';
+            item.style.borderBottom = '1px solid var(--border-color)';
+            item.innerHTML = `
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                <strong style="font-size:13px;">${f.customerName}</strong>
+                <span>${renderStars(f.rating)}</span>
+              </div>
+              <p style="font-size:12px; color:var(--text-muted); margin-bottom:4px;">"${f.reviewText}"</p>
+              <div>${CMS.getStatusBadge(f.sentimentLabel)}</div>
+            `;
+            feedEl.appendChild(item);
+          });
+        }
+      } else {
+        document.getElementById('kpiEmployees').textContent = '—';
+        document.getElementById('feedbackFeed').innerHTML = '<div style="color:var(--text-muted); padding:10px;">CSAT detailed feed restricted for employee role.</div>';
+      }
+
+    } catch (err) {
+      console.error('Failed to populate dashboard metrics:', err);
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', loadDashboard);
+</script>
+</body>
+</html>

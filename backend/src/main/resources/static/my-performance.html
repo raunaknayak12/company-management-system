@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CMS — My Performance Scorecard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .profile-hero {
+      background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%);
+      border-radius: var(--radius-lg);
+      padding: 32px;
+      color: white;
+      margin-bottom: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 24px;
+      box-shadow: 0 10px 25px -5px rgba(49, 46, 129, 0.35);
+    }
+    .profile-avatar-large {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #06b6d4, #3b82f6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      font-weight: 800;
+      color: white;
+      box-shadow: 0 4px 15px rgba(6, 182, 212, 0.4);
+      flex-shrink: 0;
+    }
+    .profile-details h2 {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      margin-bottom: 6px;
+    }
+    .profile-meta {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      font-size: 13px;
+      color: #c7d2fe;
+    }
+    .profile-meta span {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .progress-bar-bg {
+      background-color: #e2e8f0;
+      border-radius: 9999px;
+      height: 8px;
+      overflow: hidden;
+      margin-top: 8px;
+    }
+    .progress-bar-fill {
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+      height: 100%;
+      border-radius: 9999px;
+      transition: width 0.6s ease;
+    }
+  </style>
+</head>
+<body>
+
+<div class="app-container">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo-icon"><i class="fa-solid fa-cube"></i></div>
+      <div>
+        <div class="sidebar-brand-name">CMS Portal</div>
+        <div class="sidebar-brand-sub">Enterprise Suite</div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section-title">Core Management</div>
+      <a href="index.html" class="nav-link"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+      <a href="employees.html" class="nav-link" data-role="ADMIN,MANAGER"><i class="fa-solid fa-id-badge"></i> Employees</a>
+      <a href="departments.html" class="nav-link"><i class="fa-solid fa-sitemap"></i> Departments</a>
+      <a href="projects.html" class="nav-link"><i class="fa-solid fa-diagram-project"></i> Projects</a>
+
+      <div class="nav-section-title">Commercial & CRM</div>
+      <a href="customers.html" class="nav-link" data-role="ADMIN,MANAGER"><i class="fa-solid fa-users"></i> Customers</a>
+      <a href="products.html" class="nav-link"><i class="fa-solid fa-box-archive"></i> Products</a>
+      <a href="orders.html" class="nav-link"><i class="fa-solid fa-cart-shopping"></i> Sales Orders</a>
+      <a href="feedback.html" class="nav-link" data-role="ADMIN,MANAGER"><i class="fa-solid fa-comment-dots"></i> Feedback</a>
+
+      <div class="nav-section-title">Intelligence & Admin</div>
+      <a href="analytics.html" class="nav-link" data-role="ADMIN,MANAGER"><i class="fa-solid fa-chart-line"></i> Analytics & BI</a>
+      <a href="my-performance.html" class="nav-link active"><i class="fa-solid fa-trophy"></i> My Performance</a>
+      <a href="users.html" class="nav-link" data-role="ADMIN"><i class="fa-solid fa-user-gear"></i> System Users</a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-badge">
+        <div class="user-avatar" id="sidebarUserAvatar">A</div>
+        <div class="user-info-text">
+          <div class="user-name-label" id="sidebarUserName">Loading...</div>
+          <div class="user-role-pill" id="sidebarUserRole">ADMIN</div>
+        </div>
+      </div>
+      <button class="btn-logout" title="Sign out" onclick="CMS.logout()"><i class="fa-solid fa-right-from-bracket"></i></button>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-wrapper">
+    <header class="top-navbar">
+      <div class="page-title-area">
+        <h1>Personal Performance Scorecard</h1>
+        <p>Real-time individual sales quota tracking, active project assignments, and fulfillment telemetry</p>
+      </div>
+      <div class="top-actions">
+        <button class="btn btn-outline btn-sm" onclick="loadMyPerformance()">
+          <i class="fa-solid fa-arrows-rotate"></i> Refresh Metrics
+        </button>
+        <a href="orders.html" class="btn btn-primary btn-sm">
+          <i class="fa-solid fa-cart-plus"></i> New Sales Order
+        </a>
+      </div>
+    </header>
+
+    <div class="content-body" id="performanceContent">
+      <div style="text-align: center; padding: 60px; color: var(--text-muted);">
+        <i class="fa-solid fa-spinner fa-spin fa-2x"></i>
+        <div style="margin-top: 12px; font-weight: 500;">Calculating personal telemetry...</div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="/js/app.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    loadMyPerformance();
+  });
+
+  async function loadMyPerformance() {
+    const container = document.getElementById('performanceContent');
+
+    try {
+      const data = await CMS.fetchApi('/api/analytics/my-performance');
+
+      if (!data.employeeId) {
+        // Logged-in user has no linked employee profile
+        container.innerHTML = `
+          <div class="card-box" style="text-align:center; padding: 48px 24px;">
+            <div style="width: 64px; height: 64px; border-radius: 50%; background: #fef3c7; color: #b45309; display:flex; align-items:center; justify-content:center; margin:0 auto 16px; font-size:24px;">
+              <i class="fa-solid fa-user-clock"></i>
+            </div>
+            <h3 style="font-size:20px; font-weight:700; margin-bottom:8px;">No Linked Employee Record</h3>
+            <p style="color:var(--text-muted); max-width:480px; margin:0 auto 24px; font-size:14px;">
+              You are logged in as <strong>${escapeHtml(data.name || 'User')}</strong> (Role: ${escapeHtml(data.role || 'ADMIN')}).
+              Personal performance scorecards calculate metrics based on staff records linked in the Employee Directory.
+            </p>
+            <div style="display:flex; justify-content:center; gap:12px;">
+              <a href="employees.html" class="btn btn-primary btn-sm"><i class="fa-solid fa-users"></i> View Employee Directory</a>
+              <a href="index.html" class="btn btn-outline btn-sm"><i class="fa-solid fa-gauge"></i> Executive Dashboard</a>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      const initial = (data.fullName || 'U')[0].toUpperCase();
+      const totalOrders = data.ordersCount || 0;
+      const deliveredOrders = data.deliveredCount || 0;
+      const fulfillmentRate = totalOrders > 0 ? Math.round((deliveredOrders / totalOrders) * 100) : 0;
+      const totalSales = Number(data.totalSales || 0);
+
+      // Quota benchmark ($150,000 for demo benchmark)
+      const benchmarkQuota = 150000;
+      const quotaAchievedPct = Math.min(Math.round((totalSales / benchmarkQuota) * 100), 200);
+
+      container.innerHTML = `
+        <!-- Hero Profile Banner -->
+        <div class="profile-hero">
+          <div style="display: flex; align-items: center; gap: 20px;">
+            <div class="profile-avatar-large">${initial}</div>
+            <div class="profile-details">
+              <h2>${escapeHtml(data.fullName)}</h2>
+              <div class="profile-meta">
+                <span><i class="fa-solid fa-briefcase"></i> ${escapeHtml(data.jobTitle || 'Team Member')}</span>
+                <span><i class="fa-solid fa-building"></i> ${escapeHtml(data.department || 'General')}</span>
+                <span><i class="fa-solid fa-barcode"></i> ${escapeHtml(data.employeeCode || '-')}</span>
+                <span><i class="fa-solid fa-envelope"></i> ${escapeHtml(data.email || '-')}</span>
+              </div>
+            </div>
+          </div>
+          <div style="text-align: right;">
+            <span class="badge badge-active" style="padding: 6px 14px; font-size: 13px;">
+              <i class="fa-solid fa-circle-check" style="margin-right: 6px;"></i> Active Contributor
+            </span>
+          </div>
+        </div>
+
+        <!-- Metric KPI Cards -->
+        <div class="stats-grid">
+          <div class="stat-card stat-card-border-primary">
+            <div class="stat-header">
+              <span class="stat-label">Personal Sales Volume</span>
+              <div class="stat-icon stat-icon-primary"><i class="fa-solid fa-dollar-sign"></i></div>
+            </div>
+            <div class="stat-value">${CMS.formatCurrency(totalSales)}</div>
+            <div class="stat-subtext"><i class="fa-solid fa-chart-line" style="color:var(--success)"></i> Total closed order revenue</div>
+          </div>
+
+          <div class="stat-card stat-card-border-success">
+            <div class="stat-header">
+              <span class="stat-label">Orders Generated</span>
+              <div class="stat-icon stat-icon-success"><i class="fa-solid fa-cart-shopping"></i></div>
+            </div>
+            <div class="stat-value">${totalOrders}</div>
+            <div class="stat-subtext"><span style="font-weight:600; color:var(--success);">${deliveredOrders}</span> orders fully delivered</div>
+          </div>
+
+          <div class="stat-card stat-card-border-warning">
+            <div class="stat-header">
+              <span class="stat-label">Fulfillment Efficiency</span>
+              <div class="stat-icon stat-icon-warning"><i class="fa-solid fa-truck-ramp-box"></i></div>
+            </div>
+            <div class="stat-value">${fulfillmentRate}%</div>
+            <div class="stat-subtext">Delivery conversion completion rate</div>
+          </div>
+
+          <div class="stat-card stat-card-border-info">
+            <div class="stat-header">
+              <span class="stat-label">Active Project Engagements</span>
+              <div class="stat-icon stat-icon-info"><i class="fa-solid fa-diagram-project"></i></div>
+            </div>
+            <div class="stat-value">${data.activeProjectsCount || 0}</div>
+            <div class="stat-subtext"><a href="projects.html" style="color:var(--primary); text-decoration:none; font-weight:600;">View assigned deliverables <i class="fa-solid fa-arrow-right" style="margin-left:4px; font-size:11px;"></i></a></div>
+          </div>
+        </div>
+
+        <!-- Quota & Target Progress Section -->
+        <div class="grid-2-col" style="margin-top: 24px;">
+          <div class="card-box">
+            <div class="card-box-header">
+              <div>
+                <div class="card-box-title">Quarterly Target Progress</div>
+                <div class="card-box-subtitle">Benchmark sales quota allocation vs closed revenue</div>
+              </div>
+              <span class="badge badge-quoted" style="font-size:12px;">Target: ${CMS.formatCurrency(benchmarkQuota)}</span>
+            </div>
+            <div class="card-box-body">
+              <div style="display:flex; justify-content:space-between; align-items:center; font-size:14px; font-weight:600; margin-bottom:4px;">
+                <span>Achievement Status</span>
+                <span style="color:var(--primary);">${quotaAchievedPct}% achieved</span>
+              </div>
+              <div class="progress-bar-bg" style="height:12px;">
+                <div class="progress-bar-fill" style="width: ${Math.min(quotaAchievedPct, 100)}%;"></div>
+              </div>
+              <div style="display:flex; justify-content:space-between; font-size:12px; color:var(--text-muted); margin-top:8px;">
+                <span>$0.00 Base</span>
+                <span>Current: ${CMS.formatCurrency(totalSales)}</span>
+                <span>Target: ${CMS.formatCurrency(benchmarkQuota)}</span>
+              </div>
+
+              <div style="margin-top:24px; padding:16px; background:var(--bg-primary); border-radius:var(--radius-sm); border-left:4px solid var(--primary);">
+                <div style="font-size:13px; font-weight:700; color:var(--text-main); margin-bottom:4px;">
+                  <i class="fa-solid fa-lightbulb" style="color:var(--warning); margin-right:6px;"></i> Pro-tip for higher attainment:
+                </div>
+                <div style="font-size:12px; color:var(--text-muted); line-height:1.5;">
+                  Maintain active follow-ups on orders in <strong>QUOTED</strong> and <strong>CONFIRMED</strong> states to accelerate conversion to <strong>PAID</strong> and <strong>DELIVERED</strong>.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card-box">
+            <div class="card-box-header">
+              <div>
+                <div class="card-box-title">Quick Operations</div>
+                <div class="card-box-subtitle">Shortcuts to manage your commercial workflow</div>
+              </div>
+            </div>
+            <div class="card-box-body" style="display:flex; flex-direction:column; gap:12px;">
+              <a href="orders.html" class="nav-link" style="color:var(--text-main); background:var(--bg-primary); padding:14px; border:1px solid var(--border-color);">
+                <div style="width:36px; height:36px; border-radius:8px; background:#e0e7ff; color:var(--primary); display:flex; align-items:center; justify-content:center; font-size:16px;">
+                  <i class="fa-solid fa-cart-shopping"></i>
+                </div>
+                <div>
+                  <div style="font-weight:600; font-size:14px;">Review Sales Orders</div>
+                  <div style="font-size:12px; color:var(--text-muted);">Inspect order pipeline, quotations, and update client fulfillment</div>
+                </div>
+              </a>
+
+              <a href="projects.html" class="nav-link" style="color:var(--text-main); background:var(--bg-primary); padding:14px; border:1px solid var(--border-color);">
+                <div style="width:36px; height:36px; border-radius:8px; background:#ecfdf5; color:var(--success); display:flex; align-items:center; justify-content:center; font-size:16px;">
+                  <i class="fa-solid fa-diagram-project"></i>
+                </div>
+                <div>
+                  <div style="font-weight:600; font-size:14px;">Assigned Projects</div>
+                  <div style="font-size:12px; color:var(--text-muted);">Check active engineering milestones, deadlines, and project statuses</div>
+                </div>
+              </a>
+
+              <a href="feedback.html" class="nav-link" style="color:var(--text-main); background:var(--bg-primary); padding:14px; border:1px solid var(--border-color);">
+                <div style="width:36px; height:36px; border-radius:8px; background:#fef3c7; color:var(--warning); display:flex; align-items:center; justify-content:center; font-size:16px;">
+                  <i class="fa-solid fa-comment-dots"></i>
+                </div>
+                <div>
+                  <div style="font-weight:600; font-size:14px;">Customer Reviews & Feedback</div>
+                  <div style="font-size:12px; color:var(--text-muted);">Read buyer testimonials, CSAT scores, and customer sentiment signals</div>
+                </div>
+              </a>
+            </div>
+          </div>
+        </div>
+      `;
+    } catch (err) {
+      container.innerHTML = `
+        <div class="card-box" style="text-align:center; padding: 40px; color: var(--danger);">
+          <i class="fa-solid fa-circle-exclamation fa-2x" style="margin-bottom:12px;"></i>
+          <div style="font-weight:600; font-size:16px;">Unable to load personal scorecard</div>
+          <p style="font-size:13px; color:var(--text-muted); margin-top:6px;">${escapeHtml(err.message)}</p>
+          <button class="btn btn-outline btn-sm" onclick="loadMyPerformance()" style="margin-top:16px;">Try Again</button>
+        </div>
+      `;
+    }
+  }
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/[&<>'"]/g, tag => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      "'": '&#39;',
+      '"': '&quot;'
+    }[tag] || tag));
+  }
+</script>
+</body>
+</html>

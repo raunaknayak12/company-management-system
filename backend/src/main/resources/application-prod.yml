@@ -1,0 +1,83 @@
+# ═══════════════════════════════════════════════════════
+# Production Profile – Company Management System
+# Activated with: SPRING_PROFILES_ACTIVE=prod
+# ═══════════════════════════════════════════════════════
+
+server:
+  port: ${PORT:8080}
+  error:
+    include-stacktrace: never
+    include-message: never
+    whitelabel:
+      enabled: false
+  shutdown: graceful
+  tomcat:
+    connection-timeout: 10s
+    max-connections: 200
+    threads:
+      max: 100
+      min-spare: 10
+
+spring:
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
+  datasource:
+    url: ${JDBC_DATABASE_URL:${SPRING_DATASOURCE_URL:jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:cms_db}?sslmode=${DB_SSLMODE:prefer}}}
+    driverClassName: org.postgresql.Driver
+    username: ${DB_USER:${SPRING_DATASOURCE_USERNAME:cms_app}}
+    password: ${DB_PASSWORD:${SPRING_DATASOURCE_PASSWORD}}
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      idle-timeout: 300000
+      connection-timeout: 20000
+      max-lifetime: 1800000
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    open-in-view: false
+  h2:
+    console:
+      enabled: false
+
+app:
+  jwt:
+    secret: ${APP_JWT_SECRET:${JWT_SECRET}}
+    expiration-ms: ${APP_JWT_EXPIRATION_MS:86400000}
+  analytics:
+    url: ${APP_ANALYTICS_URL:${ANALYTICS_URL:http://localhost:8000}}
+    internal-key: ${APP_ANALYTICS_INTERNAL_KEY:${ANALYTICS_INTERNAL_KEY}}
+
+# ── Actuator (health, info, metrics) ─────────────────
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: when-authorized
+      probes:
+        enabled: true
+  info:
+    env:
+      enabled: true
+
+logging:
+  level:
+    root: INFO
+    com.company.cms: INFO
+    org.springframework.security: WARN
+    org.hibernate.SQL: WARN
+    org.hibernate.type.descriptor.sql: WARN
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false

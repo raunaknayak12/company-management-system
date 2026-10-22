@@ -1,29 +1,13 @@
-# Compiled class file
+# ═══════════════════════════════════════════════════════
+# Company Management System – Git Ignore
+# ═══════════════════════════════════════════════════════
+
+# ── Java / Maven ─────────────────────────────────────
 *.class
-
-# Log file
-*.log
-
-# BlueJ files
-*.ctxt
-
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
-
-# Package Files #
 *.jar
 *.war
 *.nar
 *.ear
-*.zip
-*.tar.gz
-*.rar
-
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
-hs_err_pid*
-replay_pid*
-
-# Maven
 target/
 pom.xml.tag
 pom.xml.releaseBackup
@@ -35,7 +19,12 @@ buildNumber.properties
 .mvn/timing.properties
 .mvn/wrapper/maven-wrapper.jar
 
-# Python
+# ── H2 Local Database ───────────────────────────────
+*.mv.db
+*.lock.db
+*.trace.db
+
+# ── Python ───────────────────────────────────────────
 __pycache__/
 *.py[cod]
 *$py.class
@@ -59,14 +48,31 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
-.env
-.venv
+.venv/
 venv/
 ENV/
 env.bak/
 venv.bak/
+.pytest_cache/
+.ruff_cache/
+.mustel/
 
-# IDEs
+# ── SQLite (local dev) ──────────────────────────────
+*.db
+
+# ── Environment Files (secrets) ─────────────────────
+.env
+.env.local
+.env.production
+!.env.example
+
+# ── Logs ─────────────────────────────────────────────
+*.log
+logs/
+temp/
+*.tmp
+
+# ── IDEs ─────────────────────────────────────────────
 .idea/
 *.iml
 .vscode/
@@ -75,10 +81,24 @@ venv.bak/
 *.njsproj
 *.sln
 *.sw?
+
+# ── OS Files ─────────────────────────────────────────
 .DS_Store
 Thumbs.db
+Desktop.ini
 
-# Temp and Logs
-temp/
-logs/
-*.tmp
+# ── JVM Crash Logs ──────────────────────────────────
+hs_err_pid*
+replay_pid*
+
+# ── Docker ───────────────────────────────────────────
+docker-compose.override.yml
+
+# ── Archives ─────────────────────────────────────────
+*.zip
+*.tar.gz
+*.rar
+
+# ── Mobile Tools for Java (J2ME) ────────────────────
+.mtj.tmp/
+*.ctxt

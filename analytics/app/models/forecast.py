@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 from statsmodels.tsa.holtwinters import ExponentialSmoothing
+from sqlalchemy import text
 from ..db import engine
 
 def compute_sales_forecast(horizon_months: int = 6, region: str = None):
@@ -11,13 +12,15 @@ def compute_sales_forecast(horizon_months: int = 6, region: str = None):
     JOIN dim_date d ON f.date_key = d.date_key
     WHERE f.order_status IN ('CONFIRMED', 'PAID', 'DELIVERED')
     """
+    params = {}
     if region and region.upper() != "ALL":
-        query += f" AND f.region = '{region}'"
+        query += " AND f.region = :region"
+        params["region"] = region.upper()
         
     query += " GROUP BY d.year, d.month ORDER BY d.year ASC, d.month ASC"
     
     with engine.connect() as conn:
-        df = pd.read_sql(query, conn)
+        df = pd.read_sql(text(query), conn, params=params)
         
     if len(df) < 6:
         # Fallback if insufficient points
@@ -30,7 +33,7 @@ def compute_sales_forecast(horizon_months: int = 6, region: str = None):
         }
         
     df["date"] = pd.to_datetime(df["year"].astype(str) + "-" + df["month"].astype(str).str.zfill(2) + "-01")
-    df.set_index("date", inplace=True)
+    df = df.set_index("date")
     ts = df["monthly_revenue"].asfreq("MS").ffill().fillna(0)
     
     # Train Exponential Smoothing

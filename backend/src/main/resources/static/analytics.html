@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CMS — Business Intelligence & Analytics</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+  <style>
+    .analytics-banner {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .analytics-banner-warning {
+      background: #fffbeb;
+      border-color: #fde68a;
+    }
+    .chart-container {
+      width: 100%;
+      min-height: 440px;
+      position: relative;
+    }
+    .plot-img-card {
+      background: white;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-color);
+      padding: 20px;
+      box-shadow: var(--card-shadow);
+      text-align: center;
+    }
+    .plot-img-card img {
+      max-width: 100%;
+      height: auto;
+      border-radius: var(--radius-sm);
+    }
+    .tag-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #f1f5f9;
+      color: var(--text-main);
+      padding: 6px 12px;
+      border-radius: 9999px;
+      font-size: 13px;
+      font-weight: 500;
+    }
+    .tag-pill span.count {
+      background: var(--primary);
+      color: white;
+      font-size: 11px;
+      padding: 2px 6px;
+      border-radius: 10px;
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+
+<div class="app-container">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo-icon"><i class="fa-solid fa-cube"></i></div>
+      <div>
+        <div class="sidebar-brand-name">CMS Portal</div>
+        <div class="sidebar-brand-sub">Enterprise Suite</div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section-title">Core Management</div>
+      <a href="index.html" class="nav-link"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+      <a href="employees.html" class="nav-link" data-role="ADMIN,MANAGER"><i class="fa-solid fa-id-badge"></i> Employees</a>
+      <a href="departments.html" class="nav-link"><i class="fa-solid fa-sitemap"></i> Departments</a>
+      <a href="projects.html" class="nav-link"><i class="fa-solid fa-diagram-project"></i> Projects</a>
+
+      <div class="nav-section-title">Commercial & CRM</div>
+      <a href="customers.html" class="nav-link" data-role="ADMIN,MANAGER"><i class="fa-solid fa-users"></i> Customers</a>
+      <a href="products.html" class="nav-link"><i class="fa-solid fa-box-archive"></i> Products</a>
+      <a href="orders.html" class="nav-link"><i class="fa-solid fa-cart-shopping"></i> Sales Orders</a>
+      <a href="feedback.html" class="nav-link" data-role="ADMIN,MANAGER"><i class="fa-solid fa-comment-dots"></i> Feedback</a>
+
+      <div class="nav-section-title" data-role="ADMIN,MANAGER">Intelligence & Admin</div>
+      <a href="analytics.html" class="nav-link active" data-role="ADMIN,MANAGER"><i class="fa-solid fa-chart-line"></i> Analytics & BI</a>
+      <a href="my-performance.html" class="nav-link" data-role="EMPLOYEE,MANAGER,ADMIN"><i class="fa-solid fa-trophy"></i> My Performance</a>
+      <a href="users.html" class="nav-link" data-role="ADMIN"><i class="fa-solid fa-user-gear"></i> System Users</a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-badge">
+        <div class="user-avatar" id="sidebarUserAvatar">A</div>
+        <div class="user-info-text">
+          <div class="user-name-label" id="sidebarUserName">Loading...</div>
+          <div class="user-role-pill" id="sidebarUserRole">ADMIN</div>
+        </div>
+      </div>
+      <button class="btn-logout" title="Sign out" onclick="CMS.logout()"><i class="fa-solid fa-right-from-bracket"></i></button>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-wrapper">
+    <header class="top-navbar">
+      <div class="page-title-area">
+        <h1>Intelligence & Analytics Studio</h1>
+        <p>Star-schema data warehouse telemetry, Holt-Winters forecasting, K-Means RFM, and NLP sentiment</p>
+      </div>
+      <div class="top-actions">
+        <button class="btn btn-primary btn-sm" onclick="triggerWarehouseEtl()" data-role="ADMIN">
+          <i class="fa-solid fa-bolt"></i> Run ETL Pipeline
+        </button>
+      </div>
+    </header>
+
+    <div class="content-body">
+      <!-- Status Notice -->
+      <div id="serviceNotice"></div>
+
+      <!-- Tab Navigation -->
+      <div class="tabs-nav">
+        <button class="tab-btn active" onclick="switchTab('kpisTab', this)"><i class="fa-solid fa-gauge"></i> Executive KPIs</button>
+        <button class="tab-btn" onclick="switchTab('trendTab', this)"><i class="fa-solid fa-chart-line"></i> Sales Trend</button>
+        <button class="tab-btn" onclick="switchTab('regionalTab', this)"><i class="fa-solid fa-earth-americas"></i> Regional Breakdown</button>
+        <button class="tab-btn" onclick="switchTab('funnelTab', this)"><i class="fa-solid fa-filter"></i> Conversion Funnel</button>
+        <button class="tab-btn" onclick="switchTab('forecastTab', this)"><i class="fa-solid fa-wand-magic-sparkles"></i> Sales Forecast</button>
+        <button class="tab-btn" onclick="switchTab('segmentsTab', this)"><i class="fa-solid fa-people-roof"></i> RFM Segments</button>
+        <button class="tab-btn" onclick="switchTab('sentimentTab', this)"><i class="fa-solid fa-comments"></i> NLP Sentiment</button>
+        <button class="tab-btn" onclick="switchTab('unifiedTab', this)"><i class="fa-solid fa-table-cells"></i> Unified Report</button>
+        <button class="tab-btn" onclick="switchTab('plotsTab', this)"><i class="fa-solid fa-image"></i> Statistical Plots</button>
+        <button class="tab-btn" onclick="switchTab('etlTab', this)"><i class="fa-solid fa-server"></i> Warehouse ETL</button>
+      </div>
+
+      <!-- Tab 1: KPIs -->
+      <div id="kpisTab" class="tab-pane active">
+        <div class="filter-bar">
+          <label style="font-size:13px; font-weight:600;">Region:</label>
+          <select id="kpiRegionFilter" class="form-select" style="width:140px;" onchange="loadKpis()">
+            <option value="ALL">All Regions</option>
+            <option>NORTH</option><option>SOUTH</option><option>EAST</option><option>WEST</option><option>CENTRAL</option>
+          </select>
+          <button class="btn btn-outline btn-sm" onclick="loadKpis()"><i class="fa-solid fa-rotate"></i> Refresh</button>
+        </div>
+
+        <div class="stats-grid" id="analyticsKpisGrid">
+          <div class="stat-card stat-card-border-primary">
+            <div class="stat-header"><span class="stat-label">Warehouse Revenue</span><div class="stat-icon stat-icon-primary"><i class="fa-solid fa-dollar-sign"></i></div></div>
+            <div class="stat-value" id="kpiGrossRev">$0.00</div>
+            <div class="stat-subtext" id="kpiGrowthText"><i class="fa-solid fa-arrow-trend-up" style="color:var(--success)"></i> +12.8% growth rate</div>
+          </div>
+          <div class="stat-card stat-card-border-success">
+            <div class="stat-header"><span class="stat-label">Net Profit Amount</span><div class="stat-icon stat-icon-success"><i class="fa-solid fa-wallet"></i></div></div>
+            <div class="stat-value" id="kpiGrossProfit">$0.00</div>
+            <div class="stat-subtext" id="kpiMarginText">Margin: 0.0%</div>
+          </div>
+          <div class="stat-card stat-card-border-warning">
+            <div class="stat-header"><span class="stat-label">Fulfilled Orders</span><div class="stat-icon stat-icon-warning"><i class="fa-solid fa-boxes-packing"></i></div></div>
+            <div class="stat-value" id="kpiTotalOrders">0</div>
+            <div class="stat-subtext" id="kpiAovText">Avg order: $0.00</div>
+          </div>
+          <div class="stat-card stat-card-border-info">
+            <div class="stat-header"><span class="stat-label">Client CSAT Rating</span><div class="stat-icon stat-icon-info"><i class="fa-solid fa-star"></i></div></div>
+            <div class="stat-value" id="kpiAvgRating">0.0 / 5.0</div>
+            <div class="stat-subtext">Aggregated customer feedback</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 2: Sales Trend -->
+      <div id="trendTab" class="tab-pane">
+        <div class="filter-bar">
+          <select id="trendRegion" class="form-select" style="width:140px;" onchange="loadTrendChart()">
+            <option value="ALL">All Regions</option>
+            <option>NORTH</option><option>SOUTH</option><option>EAST</option><option>WEST</option><option>CENTRAL</option>
+          </select>
+          <select id="trendCategory" class="form-select" style="width:160px;" onchange="loadTrendChart()">
+            <option value="ALL">All Categories</option>
+            <option>Software</option><option>Hardware</option><option>Cloud Services</option><option>Consulting</option>
+          </select>
+          <button class="btn btn-outline btn-sm" onclick="loadTrendChart()"><i class="fa-solid fa-rotate"></i> Refresh</button>
+        </div>
+        <div class="card-box">
+          <div class="card-box-body">
+            <div id="salesTrendPlot" class="chart-container"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 3: Regional Breakdown -->
+      <div id="regionalTab" class="tab-pane">
+        <div class="filter-bar">
+          <select id="regionalCategory" class="form-select" style="width:160px;" onchange="loadRegionalChart()">
+            <option value="ALL">All Categories</option>
+            <option>Software</option><option>Hardware</option><option>Cloud Services</option><option>Consulting</option>
+          </select>
+          <button class="btn btn-outline btn-sm" onclick="loadRegionalChart()"><i class="fa-solid fa-rotate"></i> Refresh</button>
+        </div>
+        <div class="card-box">
+          <div class="card-box-body">
+            <div id="regionalPlot" class="chart-container"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 4: Sales Funnel -->
+      <div id="funnelTab" class="tab-pane">
+        <div class="filter-bar">
+          <select id="funnelRegion" class="form-select" style="width:140px;" onchange="loadFunnelChart()">
+            <option value="ALL">All Regions</option>
+            <option>NORTH</option><option>SOUTH</option><option>EAST</option><option>WEST</option><option>CENTRAL</option>
+          </select>
+          <button class="btn btn-outline btn-sm" onclick="loadFunnelChart()"><i class="fa-solid fa-rotate"></i> Refresh</button>
+        </div>
+        <div class="card-box">
+          <div class="card-box-body">
+            <div id="funnelPlot" class="chart-container"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 5: Forecast -->
+      <div id="forecastTab" class="tab-pane">
+        <div class="filter-bar">
+          <label style="font-size:13px; font-weight:600;">Forecast Horizon:</label>
+          <select id="forecastHorizon" class="form-select" style="width:140px;" onchange="loadForecastChart()">
+            <option value="3">3 Months</option>
+            <option value="6" selected>6 Months</option>
+            <option value="12">12 Months</option>
+          </select>
+          <label style="font-size:13px; font-weight:600; margin-left:8px;">Region:</label>
+          <select id="forecastRegion" class="form-select" style="width:140px;" onchange="loadForecastChart()">
+            <option value="ALL">All Regions</option>
+            <option>NORTH</option><option>SOUTH</option><option>EAST</option><option>WEST</option><option>CENTRAL</option>
+          </select>
+          <button class="btn btn-outline btn-sm" onclick="loadForecastChart()"><i class="fa-solid fa-rotate"></i> Compute</button>
+        </div>
+
+        <div class="card-box">
+          <div class="card-box-header">
+            <div>
+              <div class="card-box-title">Holt-Winters Exponential Smoothing Sales Projections</div>
+              <div class="card-box-subtitle" id="forecastSubtitle">Computing projection model...</div>
+            </div>
+            <span class="badge badge-confirmed" id="forecastMapeBadge">Model: Exponential Smoothing</span>
+          </div>
+          <div class="card-box-body">
+            <div id="forecastPlot" class="chart-container"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 6: Segments -->
+      <div id="segmentsTab" class="tab-pane">
+        <div class="filter-bar">
+          <label style="font-size:13px; font-weight:600;">Number of Clusters (k):</label>
+          <select id="segmentK" class="form-select" style="width:100px;" onchange="loadSegments()">
+            <option value="3">k = 3</option>
+            <option value="4" selected>k = 4</option>
+            <option value="5">k = 5</option>
+          </select>
+          <button class="btn btn-outline btn-sm" onclick="loadSegments()"><i class="fa-solid fa-play"></i> Re-cluster</button>
+        </div>
+
+        <div class="card-box" style="margin-bottom: 24px;">
+          <div class="card-box-header">
+            <div>
+              <div class="card-box-title">Unsupervised K-Means Customer Clustering</div>
+              <div class="card-box-subtitle">Recency, Frequency, and Monetary (RFM) Segmentation Scatter</div>
+            </div>
+          </div>
+          <div class="card-box-body">
+            <div id="segmentsPlot" class="chart-container"></div>
+          </div>
+        </div>
+
+        <div class="card-box">
+          <div class="card-box-header">
+            <div class="card-box-title">Segment Cohort Metrics</div>
+          </div>
+          <div class="card-box-body" style="padding:0;">
+            <table class="custom-table">
+              <thead>
+                <tr>
+                  <th>Segment Label</th>
+                  <th>Customer Count</th>
+                  <th>Avg Recency (Days)</th>
+                  <th>Avg Order Frequency</th>
+                  <th>Avg Spend</th>
+                  <th>Total Revenue Contribution</th>
+                </tr>
+              </thead>
+              <tbody id="segmentsTableBody">
+                <tr><td colspan="6" style="text-align:center; padding:30px; color:var(--text-muted);">Run clustering to view cohort statistics...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 7: Sentiment -->
+      <div id="sentimentTab" class="tab-pane">
+        <div class="grid-2-col" style="margin-bottom: 24px;">
+          <div class="card-box">
+            <div class="card-box-header">
+              <div class="card-box-title">Sentiment Distribution Breakdown</div>
+            </div>
+            <div class="card-box-body">
+              <div id="sentimentPiePlot" style="height:320px;"></div>
+            </div>
+          </div>
+
+          <div class="card-box">
+            <div class="card-box-header">
+              <div class="card-box-title">Customer Experience Signals</div>
+            </div>
+            <div class="card-box-body" style="display:flex; flex-direction:column; justify-content:center; gap:20px;">
+              <div style="display:flex; align-items:center; gap:16px;">
+                <div style="font-size:40px; font-weight:800; color:var(--primary);" id="sentimentAvgRating">4.2</div>
+                <div>
+                  <div style="font-weight:700; font-size:15px;">Mean Customer Satisfaction (CSAT)</div>
+                  <div style="color:var(--text-muted); font-size:13px;" id="sentimentTotalReviews">Based on verified reviews</div>
+                </div>
+              </div>
+
+              <div>
+                <div style="font-weight:600; font-size:13px; margin-bottom:10px; color:var(--text-main);">Frequent Buyer Terminology:</div>
+                <div id="keywordsCloud" style="display:flex; flex-wrap:wrap; gap:8px;">
+                  <span class="tag-pill">excellent <span class="count">4</span></span>
+                  <span class="tag-pill">quality <span class="count">3</span></span>
+                  <span class="tag-pill">delivery <span class="count">2</span></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 8: Unified Report -->
+      <div id="unifiedTab" class="tab-pane">
+        <div class="card-box">
+          <div class="card-box-header">
+            <div>
+              <div class="card-box-title">Cross-Functional Telemetry Report</div>
+              <div class="card-box-subtitle">Pandas Star-Schema Join: Sales Orders + Employees + Customer Sentiment</div>
+            </div>
+            <button class="btn btn-outline btn-sm" onclick="loadUnifiedReport()"><i class="fa-solid fa-arrows-rotate"></i> Refresh Report</button>
+          </div>
+          <div class="card-box-body" style="padding:0;">
+            <table class="custom-table">
+              <thead>
+                <tr>
+                  <th>Staff Code</th>
+                  <th>Sales Representative</th>
+                  <th>Department</th>
+                  <th>Closed Orders</th>
+                  <th>Revenue Generated</th>
+                  <th>Net Profit</th>
+                  <th>Quota %</th>
+                  <th>CSAT Score</th>
+                </tr>
+              </thead>
+              <tbody id="unifiedTableBody">
+                <tr><td colspan="8" style="text-align:center; padding:30px; color:var(--text-muted);">Loading cross-functional join...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 9: Statistical Plots -->
+      <div id="plotsTab" class="tab-pane">
+        <div class="grid-2-col">
+          <div class="plot-img-card">
+            <h4 style="font-size:15px; font-weight:700; margin-bottom:6px;">Financial Correlation Matrix</h4>
+            <p style="font-size:12px; color:var(--text-muted); margin-bottom:14px;">Seaborn Heatmap of Quantity, Unit Price, Net Amount, and Profit</p>
+            <div id="corrHeatmapWrapper" style="min-height:300px; display:flex; align-items:center; justify-content:center;">
+              <i class="fa-solid fa-spinner fa-spin fa-2x" style="color:var(--text-muted);"></i>
+            </div>
+          </div>
+
+          <div class="plot-img-card">
+            <h4 style="font-size:15px; font-weight:700; margin-bottom:6px;">Profit Spread by Product Category</h4>
+            <p style="font-size:12px; color:var(--text-muted); margin-bottom:14px;">Seaborn Quartile & Outlier Boxplot Distribution</p>
+            <div id="catBoxPlotWrapper" style="min-height:300px; display:flex; align-items:center; justify-content:center;">
+              <i class="fa-solid fa-spinner fa-spin fa-2x" style="color:var(--text-muted);"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 10: Warehouse ETL -->
+      <div id="etlTab" class="tab-pane">
+        <div class="card-box" style="max-width:800px; margin:0 auto;">
+          <div class="card-box-header">
+            <div>
+              <div class="card-box-title">Data Warehouse Pipeline Control</div>
+              <div class="card-box-subtitle">Extracts from transactional database, cleans, and builds star-schema data warehouse</div>
+            </div>
+          </div>
+          <div class="card-box-body" style="display:flex; flex-direction:column; gap:20px;">
+            <div style="background:var(--bg-primary); padding:20px; border-radius:var(--radius-sm); border:1px solid var(--border-color);">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                <span style="font-weight:700; font-size:14px;">Latest ETL Pipeline State</span>
+                <span id="etlStatusBadge" class="badge badge-active">READY</span>
+              </div>
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; font-size:13px;">
+                <div><strong>Run ID:</strong> <span id="etlRunId">-</span></div>
+                <div><strong>Execution Status:</strong> <span id="etlStatusText">-</span></div>
+                <div><strong>Records Extracted:</strong> <span id="etlRecordsExtracted">-</span></div>
+                <div><strong>Records Loaded:</strong> <span id="etlRecordsLoaded">-</span></div>
+                <div><strong>Start Time:</strong> <span id="etlStartTime">-</span></div>
+                <div><strong>End Time:</strong> <span id="etlEndTime">-</span></div>
+              </div>
+            </div>
+
+            <div>
+              <button class="btn btn-primary" id="runEtlBtn" onclick="triggerWarehouseEtl()" style="width:100%; padding:12px;">
+                <i class="fa-solid fa-bolt"></i> Execute Full ETL Extraction & Warehouse Load
+              </button>
+              <small style="color:var(--text-muted); display:block; text-align:center; margin-top:8px;">
+                Requires Python FastAPI service running at <code>http://localhost:8000</code>.
+              </small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="/js/app.js"></script>
+<script>
+  let activeTabId = 'kpisTab';
+  let isServiceAvailable = true;
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const user = CMS.getUser();
+    if (!user || (user.role !== 'ADMIN' && user.role !== 'MANAGER')) {
+      CMS.showToast('Access restricted: Intelligence & Analytics requires Manager or Administrator privileges.', 'error');
+      setTimeout(() => { window.location.href = 'index.html'; }, 1200);
+      return;
+    }
+    loadKpis();
+    loadEtlStatus();
+  });
+
+  function switchTab(tabId, btn) {
+    document.querySelectorAll('.tab-pane').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+
+    document.getElementById(tabId).classList.add('active');
+    btn.classList.add('active');
+    activeTabId = tabId;
+
+    if (tabId === 'kpisTab') loadKpis();
+    else if (tabId === 'trendTab') loadTrendChart();
+    else if (tabId === 'regionalTab') loadRegionalChart();
+    else if (tabId === 'funnelTab') loadFunnelChart();
+    else if (tabId === 'forecastTab') loadForecastChart();
+    else if (tabId === 'segmentsTab') loadSegments();
+    else if (tabId === 'sentimentTab') loadSentiment();
+    else if (tabId === 'unifiedTab') loadUnifiedReport();
+    else if (tabId === 'plotsTab') loadAdvancedPlots();
+    else if (tabId === 'etlTab') loadEtlStatus();
+  }
+
+  function handleServiceUnavailable(res) {
+    if (res && res.status === 'UNAVAILABLE') {
+      const notice = document.getElementById('serviceNotice');
+      if (notice) {
+        notice.innerHTML = `
+          <div class="analytics-banner analytics-banner-warning">
+            <div style="display:flex; align-items:center; gap:12px;">
+              <i class="fa-solid fa-triangle-exclamation" style="color:var(--warning); font-size:20px;"></i>
+              <div>
+                <strong>Analytics Engine Notice:</strong> The Python FastAPI analytics service is currently offline.
+                <div style="font-size:12px; color:var(--text-muted); margin-top:2px;">
+                  Start the microservice with <code>python -m uvicorn analytics.app.main:app --port 8000</code> to activate live ML forecasting and data warehouse joins.
+                </div>
+              </div>
+            </div>
+            <button class="btn btn-outline btn-sm" onclick="location.reload()"><i class="fa-solid fa-rotate"></i> Re-check</button>
+          </div>
+        `;
+      }
+      return true;
+    }
+    return false;
+  }
+
+  // 1. KPIs
+  async function loadKpis() {
+    const region = document.getElementById('kpiRegionFilter').value;
+    try {
+      const data = await CMS.fetchApi(`/api/analytics/kpis?region=${region}`);
+      if (handleServiceUnavailable(data)) {
+        // Fallback UI
+        document.getElementById('kpiGrossRev').textContent = '$142,500.00';
+        document.getElementById('kpiGrossProfit').textContent = '$49,875.00';
+        document.getElementById('kpiTotalOrders').textContent = '5';
+        document.getElementById('kpiAvgRating').textContent = '4.6 / 5.0';
+        return;
+      }
+
+      document.getElementById('kpiGrossRev').textContent = CMS.formatCurrency(data.revenue);
+      document.getElementById('kpiGrossProfit').textContent = CMS.formatCurrency(data.profit);
+      document.getElementById('kpiMarginText').textContent = `Margin: ${data.profitMarginPct}%`;
+      document.getElementById('kpiTotalOrders').textContent = data.totalOrders;
+      document.getElementById('kpiAovText').textContent = `Avg order: ${CMS.formatCurrency(data.averageOrderValue)}`;
+      document.getElementById('kpiAvgRating').textContent = `${data.customerSatisfactionRating} / 5.0`;
+    } catch (err) {
+      console.warn('KPI load error:', err);
+    }
+  }
+
+  // 2. Trend
+  async function loadTrendChart() {
+    const region = document.getElementById('trendRegion').value;
+    const cat = document.getElementById('trendCategory').value;
+    try {
+      const data = await CMS.fetchApi(`/api/analytics/sales/trend?region=${region}&category=${cat}`);
+      if (handleServiceUnavailable(data)) return;
+      if (data && data.data) {
+        Plotly.newPlot('salesTrendPlot', data.data, data.layout, { responsive: true });
+      }
+    } catch (err) {
+      console.warn('Trend load error:', err);
+    }
+  }
+
+  // 3. Regional
+  async function loadRegionalChart() {
+    const cat = document.getElementById('regionalCategory').value;
+    try {
+      const data = await CMS.fetchApi(`/api/analytics/regional?category=${cat}`);
+      if (handleServiceUnavailable(data)) return;
+      if (data && data.data) {
+        Plotly.newPlot('regionalPlot', data.data, data.layout, { responsive: true });
+      }
+    } catch (err) {
+      console.warn('Regional load error:', err);
+    }
+  }
+
+  // 4. Funnel
+  async function loadFunnelChart() {
+    const region = document.getElementById('funnelRegion').value;
+    try {
+      const data = await CMS.fetchApi(`/api/analytics/funnel?region=${region}`);
+      if (handleServiceUnavailable(data)) return;
+      if (data && data.data) {
+        Plotly.newPlot('funnelPlot', data.data, data.layout, { responsive: true });
+      }
+    } catch (err) {
+      console.warn('Funnel load error:', err);
+    }
+  }
+
+  // 5. Forecast
+  async function loadForecastChart() {
+    const horizon = document.getElementById('forecastHorizon').value;
+    const region = document.getElementById('forecastRegion').value;
+    try {
+      const res = await CMS.fetchApi(`/api/analytics/forecast?horizon=${horizon}&region=${region}`);
+      if (handleServiceUnavailable(res)) return;
+
+      document.getElementById('forecastSubtitle').textContent = `Horizon: ${res.horizon} Months | In-sample MAPE: ${res.mape}% | Model: ${res.model}`;
+      document.getElementById('forecastMapeBadge').textContent = `MAPE: ${res.mape}%`;
+
+      // Build Plotly figure with confidence intervals
+      const histX = (res.historical || []).map(h => h.date);
+      const histY = (res.historical || []).map(h => h.revenue);
+
+      const fcX = (res.forecast || []).map(f => f.date);
+      const fcY = (res.forecast || []).map(f => f.predicted_revenue);
+      const upperY = (res.forecast || []).map(f => f.upper_bound);
+      const lowerY = (res.forecast || []).map(f => f.lower_bound);
+
+      const traces = [
+        {
+          x: histX,
+          y: histY,
+          mode: 'lines+markers',
+          name: 'Historical Revenue',
+          line: { color: '#4f46e5', width: 3 }
+        },
+        {
+          x: fcX,
+          y: fcY,
+          mode: 'lines+markers',
+          name: 'Forecast Projection',
+          line: { color: '#06b6d4', width: 3, dash: 'dot' }
+        },
+        {
+          x: [...fcX, ...fcX.slice().reverse()],
+          y: [...upperY, ...lowerY.slice().reverse()],
+          fill: 'toself',
+          fillcolor: 'rgba(6, 182, 212, 0.15)',
+          line: { color: 'transparent' },
+          name: '95% Confidence Band',
+          showlegend: true
+        }
+      ];
+
+      const layout = {
+        title: 'Sales Forecast Projection with Confidence Envelope',
+        xaxis: { title: 'Timeline' },
+        yaxis: { title: 'Revenue ($ USD)' },
+        template: 'plotly_white',
+        margin: { l: 50, r: 40, t: 50, b: 40 }
+      };
+
+      Plotly.newPlot('forecastPlot', traces, layout, { responsive: true });
+    } catch (err) {
+      console.warn('Forecast error:', err);
+    }
+  }
+
+  // 6. Segments
+  async function loadSegments() {
+    const k = document.getElementById('segmentK').value;
+    try {
+      const res = await CMS.fetchApi(`/api/analytics/segments?k=${k}`);
+      if (handleServiceUnavailable(res)) return;
+
+      // Render Table
+      const tbody = document.getElementById('segmentsTableBody');
+      tbody.innerHTML = (res.summary || []).map(s => `
+        <tr>
+          <td><strong style="color:var(--primary);">${escapeHtml(s.segmentName)}</strong></td>
+          <td>${s.customerCount}</td>
+          <td>${s.avgRecencyDays} d</td>
+          <td>${s.avgFrequencyOrders} orders</td>
+          <td>${CMS.formatCurrency(s.avgMonetarySpend)}</td>
+          <td><strong>${CMS.formatCurrency(s.totalRevenueContribution)}</strong></td>
+        </tr>
+      `).join('');
+
+      // Render Plotly Scatter
+      const points = res.points || [];
+      const clusters = [...new Set(points.map(p => p.cluster))];
+      const traces = clusters.map(cId => {
+        const clusterPoints = points.filter(p => p.cluster === cId);
+        const name = clusterPoints.length > 0 ? clusterPoints[0].segmentName : `Segment ${cId}`;
+        return {
+          x: clusterPoints.map(p => p.frequency),
+          y: clusterPoints.map(p => p.monetary),
+          text: clusterPoints.map(p => `${p.companyName} (${p.region})`),
+          mode: 'markers',
+          type: 'scatter',
+          name: name,
+          marker: { size: 12, opacity: 0.85 }
+        };
+      });
+
+      const layout = {
+        title: 'Customer RFM Segmentation: Monetary Spend vs Order Frequency',
+        xaxis: { title: 'Order Frequency (Count)' },
+        yaxis: { title: 'Monetary Spend ($ USD)' },
+        template: 'plotly_white',
+        margin: { l: 50, r: 40, t: 50, b: 40 }
+      };
+
+      Plotly.newPlot('segmentsPlot', traces, layout, { responsive: true });
+    } catch (err) {
+      console.warn('Segments error:', err);
+    }
+  }
+
+  // 7. Sentiment
+  async function loadSentiment() {
+    try {
+      const res = await CMS.fetchApi('/api/analytics/sentiment');
+      if (handleServiceUnavailable(res)) return;
+
+      document.getElementById('sentimentAvgRating').textContent = (res.averageRating || 0).toFixed(1);
+      document.getElementById('sentimentTotalReviews').textContent = `Calculated across ${res.totalReviews || 0} customer reviews`;
+
+      // Word cloud / keywords
+      const cloud = document.getElementById('keywordsCloud');
+      cloud.innerHTML = (res.topKeywords || []).map(k => `
+        <span class="tag-pill">${escapeHtml(k.word)} <span class="count">${k.count}</span></span>
+      `).join('');
+
+      // Sentiment Pie Chart
+      const dist = res.sentimentDistribution || { positive: 1, neutral: 0, negative: 0 };
+      const pieData = [{
+        values: [dist.positive || 0, dist.neutral || 0, dist.negative || 0],
+        labels: ['Positive', 'Neutral', 'Negative'],
+        type: 'pie',
+        marker: { colors: ['#10b981', '#94a3b8', '#ef4444'] },
+        hole: 0.4
+      }];
+
+      const layout = {
+        title: 'Review Polarity Ratio',
+        template: 'plotly_white',
+        margin: { l: 20, r: 20, t: 40, b: 20 },
+        height: 300
+      };
+
+      Plotly.newPlot('sentimentPiePlot', pieData, layout, { responsive: true });
+    } catch (err) {
+      console.warn('Sentiment error:', err);
+    }
+  }
+
+  // 8. Unified Report
+  async function loadUnifiedReport() {
+    const tbody = document.getElementById('unifiedTableBody');
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:30px; color:var(--text-muted);"><i class="fa-solid fa-spinner fa-spin"></i> Generating cross-functional star-schema joins...</td></tr>`;
+
+    try {
+      const res = await CMS.fetchApi('/api/analytics/unified');
+      if (handleServiceUnavailable(res)) {
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:30px; color:var(--text-muted);">Analytics service unavailable. Start Python backend to generate report.</td></tr>`;
+        return;
+      }
+
+      const rows = res.report || [];
+      if (rows.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:30px; color:var(--text-muted);">No records found in warehouse fact tables.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = rows.map(r => `
+        <tr>
+          <td><span class="badge badge-neutral">${escapeHtml(r.employeeCode)}</span></td>
+          <td><strong>${escapeHtml(r.employeeName)}</strong></td>
+          <td>${escapeHtml(r.department)}</td>
+          <td>${r.ordersClosed}</td>
+          <td><strong>${CMS.formatCurrency(r.totalRevenue)}</strong></td>
+          <td style="color:var(--success); font-weight:600;">${CMS.formatCurrency(r.totalProfit)}</td>
+          <td>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <div style="flex-grow:1; background:#e2e8f0; border-radius:4px; height:6px; width:60px;">
+                <div style="background:var(--primary); width:${Math.min(r.quotaAchievementPct, 100)}%; height:100%; border-radius:4px;"></div>
+              </div>
+              <span style="font-size:12px; font-weight:600;">${r.quotaAchievementPct}%</span>
+            </div>
+          </td>
+          <td><span class="badge badge-positive"><i class="fa-solid fa-star" style="margin-right:4px;"></i> ${r.satisfactionScore}</span></td>
+        </tr>
+      `).join('');
+    } catch (err) {
+      tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:30px; color:var(--danger);">${err.message}</td></tr>`;
+    }
+  }
+
+  // 9. Statistical Plots
+  async function loadAdvancedPlots() {
+    const corrWrapper = document.getElementById('corrHeatmapWrapper');
+    const catWrapper = document.getElementById('catBoxPlotWrapper');
+
+    try {
+      const data = await CMS.fetchApi('/api/analytics/advanced-plots');
+      if (handleServiceUnavailable(data)) return;
+
+      if (data.correlationHeatmap) {
+        corrWrapper.innerHTML = `<img src="data:image/png;base64,${data.correlationHeatmap}" alt="Correlation Heatmap">`;
+      } else {
+        corrWrapper.innerHTML = `<div style="color:var(--text-muted);">No plot available</div>`;
+      }
+
+      if (data.categoryBoxPlot) {
+        catWrapper.innerHTML = `<img src="data:image/png;base64,${data.categoryBoxPlot}" alt="Category Boxplot">`;
+      } else {
+        catWrapper.innerHTML = `<div style="color:var(--text-muted);">No plot available</div>`;
+      }
+    } catch (err) {
+      console.warn('Plots error:', err);
+    }
+  }
+
+  // 10. Warehouse ETL
+  async function loadEtlStatus() {
+    try {
+      const status = await CMS.fetchApi('/api/analytics/etl/status');
+      if (handleServiceUnavailable(status)) return;
+
+      document.getElementById('etlRunId').textContent = status.run_id || status.runId || 'None';
+      document.getElementById('etlStatusText').textContent = status.status || 'READY';
+      document.getElementById('etlStatusBadge').textContent = status.status || 'READY';
+      document.getElementById('etlRecordsExtracted').textContent = status.records_extracted || status.recordsExtracted || 0;
+      document.getElementById('etlRecordsLoaded').textContent = status.records_loaded || status.recordsLoaded || 0;
+      document.getElementById('etlStartTime').textContent = CMS.formatDate(status.start_time || status.startTime) || '-';
+      document.getElementById('etlEndTime').textContent = CMS.formatDate(status.end_time || status.endTime) || '-';
+    } catch (err) {
+      console.warn('ETL status error:', err);
+    }
+  }
+
+  async function triggerWarehouseEtl() {
+    const btn = document.getElementById('runEtlBtn');
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Running Warehouse ETL Extraction...';
+    }
+
+    try {
+      const result = await CMS.fetchApi('/api/analytics/etl/run', { method: 'POST' });
+      if (handleServiceUnavailable(result)) return;
+
+      CMS.showToast('ETL pipeline executed successfully! Data warehouse refreshed.', 'success');
+      loadEtlStatus();
+      loadKpis();
+    } catch (err) {
+      CMS.showToast('ETL run failed: ' + err.message, 'error');
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-bolt"></i> Execute Full ETL Extraction & Warehouse Load';
+      }
+    }
+  }
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/[&<>'"]/g, tag => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      "'": '&#39;',
+      '"': '&quot;'
+    }[tag] || tag));
+  }
+</script>
+</body>
+</html>

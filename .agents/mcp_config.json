@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "mustel": {
+      "command": "mustel",
+      "args": [
+        "serve"
+      ]
+    }
+  }
+}

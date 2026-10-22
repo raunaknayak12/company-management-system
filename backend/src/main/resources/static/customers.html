@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CMS — Customer CRM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div class="app-container">
+  <aside class="sidebar">
+    <div class="sidebar-header"><div class="sidebar-logo-icon"><i class="fa-solid fa-cube"></i></div><div><div class="sidebar-brand-name">CMS Portal</div><div class="sidebar-brand-sub">Enterprise Suite</div></div></div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-title">Core Management</div>
+      <a href="index.html" class="nav-link"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+      <a href="employees.html" class="nav-link" data-role="ADMIN,MANAGER"><i class="fa-solid fa-id-badge"></i> Employees</a>
+      <a href="departments.html" class="nav-link"><i class="fa-solid fa-sitemap"></i> Departments</a>
+      <a href="projects.html" class="nav-link"><i class="fa-solid fa-diagram-project"></i> Projects</a>
+      <div class="nav-section-title">Commercial & CRM</div>
+      <a href="customers.html" class="nav-link active" data-role="ADMIN,MANAGER"><i class="fa-solid fa-users"></i> Customers</a>
+      <a href="products.html" class="nav-link"><i class="fa-solid fa-box-archive"></i> Products</a>
+      <a href="orders.html" class="nav-link"><i class="fa-solid fa-cart-shopping"></i> Sales Orders</a>
+      <a href="feedback.html" class="nav-link" data-role="ADMIN,MANAGER"><i class="fa-solid fa-comment-dots"></i> Feedback</a>
+      <div class="nav-section-title" data-role="ADMIN,MANAGER">Intelligence & Admin</div>
+      <a href="analytics.html" class="nav-link" data-role="ADMIN,MANAGER"><i class="fa-solid fa-chart-line"></i> Analytics & BI</a>
+      <a href="users.html" class="nav-link" data-role="ADMIN"><i class="fa-solid fa-user-gear"></i> System Users</a>
+    </nav>
+    <div class="sidebar-footer"><div class="user-badge"><div class="user-avatar" id="sidebarUserAvatar">A</div><div class="user-info-text"><div class="user-name-label" id="sidebarUserName">Loading...</div><div class="user-role-pill" id="sidebarUserRole">ADMIN</div></div></div><button class="btn-logout" onclick="CMS.logout()"><i class="fa-solid fa-right-from-bracket"></i></button></div>
+  </aside>
+  <main class="main-wrapper">
+    <header class="top-navbar">
+      <div class="page-title-area"><h1>Customer Relationship Manager</h1><p>Client accounts, regional segmentation, and contact registry</p></div>
+      <div class="top-actions"><button class="btn btn-primary btn-sm" onclick="openModal()"><i class="fa-solid fa-plus"></i> Add Customer</button></div>
+    </header>
+    <div class="content-body">
+      <div class="filter-bar">
+        <select id="regionFilter" class="form-select" style="width:160px;"><option value="">All Regions</option><option>NORTH</option><option>SOUTH</option><option>EAST</option><option>WEST</option><option>CENTRAL</option></select>
+        <button class="btn btn-outline" onclick="loadCustomers()"><i class="fa-solid fa-filter"></i> Filter</button>
+      </div>
+      <div class="card-box"><div class="card-box-body" style="padding:0;">
+        <table class="custom-table">
+          <thead><tr><th>ID</th><th>Company Name</th><th>Contact</th><th>Email</th><th>Phone</th><th>Region</th><th style="text-align:right">Actions</th></tr></thead>
+          <tbody id="custTbody"><tr><td colspan="7" style="text-align:center;padding:30px;color:var(--text-muted);">Loading CRM...</td></tr></tbody>
+        </table>
+      </div></div>
+    </div>
+  </main>
+</div>
+
+<div class="modal-overlay" id="custModal">
+  <div class="modal-card">
+    <div class="modal-header"><h3 style="font-size:16px;font-weight:700;" id="cModalTitle">Add Customer</h3><button onclick="closeModal()" style="background:transparent;border:none;font-size:20px;cursor:pointer;">&times;</button></div>
+    <form id="custForm">
+      <div class="modal-body">
+        <input type="hidden" id="cId">
+        <div><label class="form-label">Company Name *</label><input type="text" id="cCompany" class="form-control" required style="width:100%;"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+          <div><label class="form-label">Contact Name</label><input type="text" id="cContact" class="form-control" style="width:100%;"></div>
+          <div><label class="form-label">Region *</label><select id="cRegion" class="form-select" required style="width:100%;"><option>NORTH</option><option>SOUTH</option><option>EAST</option><option>WEST</option><option>CENTRAL</option></select></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+          <div><label class="form-label">Email *</label><input type="email" id="cEmail" class="form-control" required style="width:100%;"></div>
+          <div><label class="form-label">Phone</label><input type="text" id="cPhone" class="form-control" style="width:100%;"></div>
+        </div>
+      </div>
+      <div class="modal-footer"><button type="button" class="btn btn-outline" onclick="closeModal()">Cancel</button><button type="submit" class="btn btn-primary">Save</button></div>
+    </form>
+  </div>
+</div>
+
+<script src="/js/app.js"></script>
+<script>
+async function loadCustomers() {
+  const r = document.getElementById('regionFilter').value;
+  let url = '/api/customers'; if (r) url += `?region=${r}`;
+  try {
+    const list = await CMS.fetchApi(url);
+    const tb = document.getElementById('custTbody'); tb.innerHTML='';
+    const user = CMS.getUser(); const isAdmin = user && user.role==='ADMIN';
+    list.forEach(c => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>#${c.id}</td><td><strong>${c.companyName}</strong></td><td>${c.contactName||'—'}</td><td>${c.email}</td><td>${c.phone||'—'}</td><td><span class="badge badge-inquiry">${c.region}</span></td>
+        <td style="text-align:right;"><button class="btn btn-outline btn-sm" onclick='editC(${JSON.stringify(c)})'><i class="fa-solid fa-pen"></i></button>${isAdmin?` <button class="btn btn-outline btn-sm" style="color:var(--danger);" onclick="delC(${c.id})"><i class="fa-solid fa-trash"></i></button>`:''}</td>`;
+      tb.appendChild(tr);
+    });
+  } catch(e) { CMS.showToast(e.message,'error'); }
+}
+
+function openModal() { document.getElementById('cModalTitle').textContent='Add Customer'; document.getElementById('cId').value=''; document.getElementById('custForm').reset(); document.getElementById('custModal').style.display='flex'; }
+function closeModal() { document.getElementById('custModal').style.display='none'; }
+function editC(c) { document.getElementById('cModalTitle').textContent='Edit Customer'; document.getElementById('cId').value=c.id; document.getElementById('cCompany').value=c.companyName; document.getElementById('cContact').value=c.contactName||''; document.getElementById('cEmail').value=c.email; document.getElementById('cPhone').value=c.phone||''; document.getElementById('cRegion').value=c.region; document.getElementById('custModal').style.display='flex'; }
+
+document.getElementById('custForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const id=document.getElementById('cId').value;
+  const payload={companyName:document.getElementById('cCompany').value.trim(),contactName:document.getElementById('cContact').value.trim(),email:document.getElementById('cEmail').value.trim(),phone:document.getElementById('cPhone').value.trim(),region:document.getElementById('cRegion').value};
+  try {
+    if(id){await CMS.fetchApi(`/api/customers/${id}`,{method:'PUT',body:JSON.stringify(payload)});CMS.showToast('Customer updated','success');}
+    else{await CMS.fetchApi('/api/customers',{method:'POST',body:JSON.stringify(payload)});CMS.showToast('Customer created','success');}
+    closeModal(); loadCustomers();
+  }catch(e){CMS.showToast(e.message,'error');}
+});
+
+async function delC(id){if(!confirm('Delete this customer?'))return;try{await CMS.fetchApi(`/api/customers/${id}`,{method:'DELETE'});CMS.showToast('Deleted','success');loadCustomers();}catch(e){CMS.showToast(e.message,'error');}}
+
+document.addEventListener('DOMContentLoaded', loadCustomers);
+</script>
+</body>
+</html>

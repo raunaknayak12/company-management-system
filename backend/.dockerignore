@@ -1,0 +1,11 @@
+target/
+*.class
+*.jar
+*.war
+*.mv.db
+*.lock.db
+*.log
+.idea/
+.vscode/
+*.iml
+.git/

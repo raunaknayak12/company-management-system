@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CMS — Sales Orders</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div class="app-container">
+  <aside class="sidebar">
+    <div class="sidebar-header"><div class="sidebar-logo-icon"><i class="fa-solid fa-cube"></i></div><div><div class="sidebar-brand-name">CMS Portal</div><div class="sidebar-brand-sub">Enterprise Suite</div></div></div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-title">Core Management</div>
+      <a href="index.html" class="nav-link"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+      <a href="employees.html" class="nav-link" data-role="ADMIN,MANAGER"><i class="fa-solid fa-id-badge"></i> Employees</a>
+      <a href="departments.html" class="nav-link"><i class="fa-solid fa-sitemap"></i> Departments</a>
+      <a href="projects.html" class="nav-link"><i class="fa-solid fa-diagram-project"></i> Projects</a>
+      <div class="nav-section-title">Commercial & CRM</div>
+      <a href="customers.html" class="nav-link" data-role="ADMIN,MANAGER"><i class="fa-solid fa-users"></i> Customers</a>
+      <a href="products.html" class="nav-link"><i class="fa-solid fa-box-archive"></i> Products</a>
+      <a href="orders.html" class="nav-link active"><i class="fa-solid fa-cart-shopping"></i> Sales Orders</a>
+      <a href="feedback.html" class="nav-link" data-role="ADMIN,MANAGER"><i class="fa-solid fa-comment-dots"></i> Feedback</a>
+      <div class="nav-section-title" data-role="ADMIN,MANAGER">Intelligence & Admin</div>
+      <a href="analytics.html" class="nav-link" data-role="ADMIN,MANAGER"><i class="fa-solid fa-chart-line"></i> Analytics & BI</a>
+      <a href="my-performance.html" class="nav-link" data-role="EMPLOYEE"><i class="fa-solid fa-trophy"></i> My Performance</a>
+      <a href="users.html" class="nav-link" data-role="ADMIN"><i class="fa-solid fa-user-gear"></i> System Users</a>
+    </nav>
+    <div class="sidebar-footer"><div class="user-badge"><div class="user-avatar" id="sidebarUserAvatar">A</div><div class="user-info-text"><div class="user-name-label" id="sidebarUserName">Loading...</div><div class="user-role-pill" id="sidebarUserRole">ADMIN</div></div></div><button class="btn-logout" title="Sign out" onclick="CMS.logout()"><i class="fa-solid fa-right-from-bracket"></i></button></div>
+  </aside>
+
+  <main class="main-wrapper">
+    <header class="top-navbar">
+      <div class="page-title-area"><h1>Sales Order Pipeline</h1><p>Enterprise order management, pricing, and status workflow tracking</p></div>
+      <div class="top-actions"><button class="btn btn-primary btn-sm" onclick="openCreateOrderModal()"><i class="fa-solid fa-plus"></i> New Order</button></div>
+    </header>
+
+    <div class="content-body">
+      <div class="filter-bar">
+        <select id="statusFilter" class="form-select" style="width:160px;">
+          <option value="">All Statuses</option>
+          <option value="INQUIRY">Inquiry</option><option value="QUOTED">Quoted</option><option value="CONFIRMED">Confirmed</option>
+          <option value="PAID">Paid</option><option value="DELIVERED">Delivered</option><option value="CANCELLED">Cancelled</option>
+        </select>
+        <select id="regionFilter" class="form-select" style="width:140px;">
+          <option value="">All Regions</option>
+          <option>NORTH</option><option>SOUTH</option><option>EAST</option><option>WEST</option><option>CENTRAL</option>
+        </select>
+        <button class="btn btn-outline" onclick="loadOrders()"><i class="fa-solid fa-filter"></i> Apply</button>
+      </div>
+
+      <div class="card-box">
+        <div class="card-box-body" style="padding:0;">
+          <table class="custom-table">
+            <thead><tr><th>Order No</th><th>Customer</th><th>Sales Rep</th><th>Region</th><th>Subtotal</th><th>Disc%</th><th>Total</th><th>Status</th><th style="text-align:right;">Actions</th></tr></thead>
+            <tbody id="ordersTbody"><tr><td colspan="9" style="text-align:center;padding:30px;color:var(--text-muted);">Loading order pipeline...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Create Order Modal -->
+<div class="modal-overlay" id="createOrderModal">
+  <div class="modal-card" style="max-width:650px;">
+    <div class="modal-header"><h3 style="font-size:16px;font-weight:700;">Create Sales Order</h3><button onclick="closeCreateOrderModal()" style="background:transparent;border:none;font-size:20px;cursor:pointer;">&times;</button></div>
+    <form id="createOrderForm">
+      <div class="modal-body">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+          <div><label class="form-label">Customer *</label><select id="orderCustomerId" class="form-select" required style="width:100%;"></select></div>
+          <div><label class="form-label">Discount %</label><input type="number" id="orderDiscount" class="form-control" min="0" max="30" step="0.5" value="0" style="width:100%;"></div>
+        </div>
+        <div style="margin-top:16px;">
+          <label class="form-label">Line Items</label>
+          <div id="itemsContainer"></div>
+          <button type="button" class="btn btn-outline btn-sm" style="margin-top:8px;" onclick="addItemRow()"><i class="fa-solid fa-plus"></i> Add Item</button>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="closeCreateOrderModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary">Submit Order</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Status Change Modal -->
+<div class="modal-overlay" id="statusModal">
+  <div class="modal-card" style="max-width:400px;">
+    <div class="modal-header"><h3 style="font-size:16px;font-weight:700;">Change Order Status</h3><button onclick="document.getElementById('statusModal').style.display='none'" style="background:transparent;border:none;font-size:20px;cursor:pointer;">&times;</button></div>
+    <form id="statusForm">
+      <div class="modal-body">
+        <input type="hidden" id="statusOrderId">
+        <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Current: <strong id="statusCurrentLabel"></strong></p>
+        <label class="form-label">New Status *</label>
+        <select id="newStatusSelect" class="form-select" required style="width:100%;"></select>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="document.getElementById('statusModal').style.display='none'">Cancel</button>
+        <button type="submit" class="btn btn-primary">Update Status</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="/js/app.js"></script>
+<script>
+let products = [], customers = [];
+const WORKFLOW = {
+  INQUIRY: ['QUOTED','CANCELLED'], QUOTED: ['CONFIRMED','CANCELLED'], CONFIRMED: ['PAID','CANCELLED'],
+  PAID: ['DELIVERED','CANCELLED'], DELIVERED: [], CANCELLED: []
+};
+
+async function init() {
+  try {
+    products = await CMS.fetchApi('/api/products');
+    const user = CMS.getUser();
+    if (user && user.role !== 'EMPLOYEE') {
+      customers = await CMS.fetchApi('/api/customers');
+    } else {
+      customers = [];
+    }
+    const sel = document.getElementById('orderCustomerId');
+    customers.forEach(c => { sel.innerHTML += `<option value="${c.id}">${c.companyName} (${c.region})</option>`; });
+    addItemRow();
+    await loadOrders();
+  } catch(e) { CMS.showToast(e.message, 'error'); }
+}
+
+async function loadOrders() {
+  let url = '/api/orders?';
+  const s = document.getElementById('statusFilter').value;
+  const r = document.getElementById('regionFilter').value;
+  if (s) url += `status=${s}&`;
+  if (r) url += `region=${r}&`;
+  try {
+    const orders = await CMS.fetchApi(url);
+    const tb = document.getElementById('ordersTbody'); tb.innerHTML = '';
+    if (!orders||!orders.length) { tb.innerHTML='<tr><td colspan="9" style="text-align:center;padding:30px;color:var(--text-muted);">No orders match criteria.</td></tr>'; return; }
+    const user = CMS.getUser();
+    const canChangeStatus = user && (user.role==='ADMIN'||user.role==='MANAGER');
+    orders.forEach(o => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><strong>${o.orderNumber}</strong></td>
+        <td>${o.customerName||''}</td><td>${o.salesRepName||''}</td>
+        <td><span class="badge badge-inquiry">${o.region}</span></td>
+        <td>${CMS.formatCurrency(o.subtotalAmount)}</td>
+        <td>${o.discountPercent||0}%</td>
+        <td><strong>${CMS.formatCurrency(o.totalAmount)}</strong></td>
+        <td>${CMS.getStatusBadge(o.status)}</td>
+        <td style="text-align:right;">
+          ${canChangeStatus && WORKFLOW[o.status] && WORKFLOW[o.status].length ? `<button class="btn btn-outline btn-sm" onclick="openStatusModal(${o.id},'${o.status}')"><i class="fa-solid fa-rotate"></i></button>` : ''}
+        </td>`;
+      tb.appendChild(tr);
+    });
+  } catch(e) { CMS.showToast(e.message, 'error'); }
+}
+
+function addItemRow() {
+  const c = document.getElementById('itemsContainer');
+  const idx = c.children.length;
+  const div = document.createElement('div');
+  div.style.cssText = 'display:flex;gap:10px;align-items:center;margin-bottom:8px;';
+  let opts = '<option value="">Select product</option>';
+  products.forEach(p => { opts += `<option value="${p.id}">${p.name} (${CMS.formatCurrency(p.unitPrice)})</option>`; });
+  div.innerHTML = `<select class="form-select item-product" required style="flex:2;">${opts}</select>
+    <input type="number" class="form-control item-qty" min="1" value="1" required style="flex:0.6;">
+    <button type="button" class="btn btn-outline btn-sm" style="color:var(--danger);" onclick="this.parentElement.remove()"><i class="fa-solid fa-xmark"></i></button>`;
+  c.appendChild(div);
+}
+
+function openCreateOrderModal() { document.getElementById('createOrderForm').reset(); document.getElementById('itemsContainer').innerHTML=''; addItemRow(); document.getElementById('createOrderModal').style.display='flex'; }
+function closeCreateOrderModal() { document.getElementById('createOrderModal').style.display='none'; }
+
+document.getElementById('createOrderForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const items = [];
+  document.querySelectorAll('#itemsContainer > div').forEach(row => {
+    const pid = row.querySelector('.item-product').value;
+    const qty = parseInt(row.querySelector('.item-qty').value);
+    if (pid && qty) items.push({ productId: parseInt(pid), quantity: qty });
+  });
+  if (!items.length) { CMS.showToast('Add at least one item','error'); return; }
+  const payload = { customerId: parseInt(document.getElementById('orderCustomerId').value), discountPercent: parseFloat(document.getElementById('orderDiscount').value)||0, items };
+  try {
+    await CMS.fetchApi('/api/orders', { method:'POST', body: JSON.stringify(payload) });
+    CMS.showToast('Order created successfully','success');
+    closeCreateOrderModal(); loadOrders();
+  } catch(e) { CMS.showToast(e.message,'error'); }
+});
+
+function openStatusModal(id, current) {
+  document.getElementById('statusOrderId').value = id;
+  document.getElementById('statusCurrentLabel').textContent = current;
+  const sel = document.getElementById('newStatusSelect'); sel.innerHTML='';
+  (WORKFLOW[current]||[]).forEach(s => { sel.innerHTML += `<option value="${s}">${s}</option>`; });
+  document.getElementById('statusModal').style.display='flex';
+}
+
+document.getElementById('statusForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const id = document.getElementById('statusOrderId').value;
+  const newStatus = document.getElementById('newStatusSelect').value;
+  try {
+    await CMS.fetchApi(`/api/orders/${id}/status`, { method:'PATCH', body: JSON.stringify({ newStatus }) });
+    CMS.showToast('Order status updated','success');
+    document.getElementById('statusModal').style.display='none'; loadOrders();
+  } catch(e) { CMS.showToast(e.message,'error'); }
+});
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>

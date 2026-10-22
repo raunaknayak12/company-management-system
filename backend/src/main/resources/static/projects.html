@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CMS — Projects</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div class="app-container">
+  <aside class="sidebar">
+    <div class="sidebar-header"><div class="sidebar-logo-icon"><i class="fa-solid fa-cube"></i></div><div><div class="sidebar-brand-name">CMS Portal</div><div class="sidebar-brand-sub">Enterprise Suite</div></div></div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-title">Core Management</div>
+      <a href="index.html" class="nav-link"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+      <a href="employees.html" class="nav-link" data-role="ADMIN,MANAGER"><i class="fa-solid fa-id-badge"></i> Employees</a>
+      <a href="departments.html" class="nav-link"><i class="fa-solid fa-sitemap"></i> Departments</a>
+      <a href="projects.html" class="nav-link active"><i class="fa-solid fa-diagram-project"></i> Projects</a>
+      <div class="nav-section-title">Commercial & CRM</div>
+      <a href="customers.html" class="nav-link" data-role="ADMIN,MANAGER"><i class="fa-solid fa-users"></i> Customers</a>
+      <a href="products.html" class="nav-link"><i class="fa-solid fa-box-archive"></i> Products</a>
+      <a href="orders.html" class="nav-link"><i class="fa-solid fa-cart-shopping"></i> Sales Orders</a>
+      <a href="feedback.html" class="nav-link" data-role="ADMIN,MANAGER"><i class="fa-solid fa-comment-dots"></i> Feedback</a>
+      <div class="nav-section-title" data-role="ADMIN,MANAGER">Intelligence & Admin</div>
+      <a href="analytics.html" class="nav-link" data-role="ADMIN,MANAGER"><i class="fa-solid fa-chart-line"></i> Analytics & BI</a>
+      <a href="my-performance.html" class="nav-link" data-role="EMPLOYEE"><i class="fa-solid fa-trophy"></i> My Performance</a>
+      <a href="users.html" class="nav-link" data-role="ADMIN"><i class="fa-solid fa-user-gear"></i> System Users</a>
+    </nav>
+    <div class="sidebar-footer"><div class="user-badge"><div class="user-avatar" id="sidebarUserAvatar">A</div><div class="user-info-text"><div class="user-name-label" id="sidebarUserName">Loading...</div><div class="user-role-pill" id="sidebarUserRole">ADMIN</div></div></div><button class="btn-logout" onclick="CMS.logout()"><i class="fa-solid fa-right-from-bracket"></i></button></div>
+  </aside>
+  <main class="main-wrapper">
+    <header class="top-navbar">
+      <div class="page-title-area"><h1>Project Portfolio</h1><p>Strategic project management, team staffing, and milestone tracking</p></div>
+      <div class="top-actions"><button class="btn btn-primary btn-sm" data-role="ADMIN,MANAGER" onclick="openModal()"><i class="fa-solid fa-plus"></i> New Project</button></div>
+    </header>
+    <div class="content-body">
+      <div class="card-box"><div class="card-box-body" style="padding:0;">
+        <table class="custom-table">
+          <thead><tr><th>Project Name</th><th>Department</th><th>Start</th><th>End</th><th>Status</th><th>Team</th><th style="text-align:right">Actions</th></tr></thead>
+          <tbody id="projTbody"><tr><td colspan="7" style="text-align:center;padding:30px;color:var(--text-muted);">Loading projects...</td></tr></tbody>
+        </table>
+      </div></div>
+    </div>
+  </main>
+</div>
+
+<div class="modal-overlay" id="projModal">
+  <div class="modal-card">
+    <div class="modal-header"><h3 style="font-size:16px;font-weight:700;" id="projModalTitle">Create Project</h3><button onclick="closeModal()" style="background:transparent;border:none;font-size:20px;cursor:pointer;">&times;</button></div>
+    <form id="projForm">
+      <div class="modal-body">
+        <input type="hidden" id="projId">
+        <div><label class="form-label">Project Name *</label><input type="text" id="projName" class="form-control" required style="width:100%;"></div>
+        <div><label class="form-label">Description</label><textarea id="projDesc" class="form-control" rows="2" style="width:100%;"></textarea></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+          <div><label class="form-label">Department *</label><select id="projDeptId" class="form-select" required style="width:100%;"></select></div>
+          <div><label class="form-label">Status *</label><select id="projStatus" class="form-select" required style="width:100%;"><option>PLANNED</option><option>ACTIVE</option><option>COMPLETED</option><option>ON_HOLD</option></select></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+          <div><label class="form-label">Start Date *</label><input type="date" id="projStart" class="form-control" required style="width:100%;"></div>
+          <div><label class="form-label">End Date</label><input type="date" id="projEnd" class="form-control" style="width:100%;"></div>
+        </div>
+      </div>
+      <div class="modal-footer"><button type="button" class="btn btn-outline" onclick="closeModal()">Cancel</button><button type="submit" class="btn btn-primary">Save</button></div>
+    </form>
+  </div>
+</div>
+
+<!-- Assign Employee Modal -->
+<div class="modal-overlay" id="assignModal">
+  <div class="modal-card" style="max-width:400px;">
+    <div class="modal-header"><h3 style="font-size:16px;font-weight:700;">Assign Team Member</h3><button onclick="document.getElementById('assignModal').style.display='none'" style="background:transparent;border:none;font-size:20px;cursor:pointer;">&times;</button></div>
+    <form id="assignForm">
+      <div class="modal-body">
+        <input type="hidden" id="assignProjId">
+        <label class="form-label">Select Employee *</label>
+        <select id="assignEmpId" class="form-select" required style="width:100%;"></select>
+      </div>
+      <div class="modal-footer"><button type="button" class="btn btn-outline" onclick="document.getElementById('assignModal').style.display='none'">Cancel</button><button type="submit" class="btn btn-primary">Assign</button></div>
+    </form>
+  </div>
+</div>
+
+<script src="/js/app.js"></script>
+<script>
+let departments=[],employees=[];
+async function init(){
+  try{
+    departments=await CMS.fetchApi('/api/departments');
+    const deptSel=document.getElementById('projDeptId');
+    departments.forEach(d=>{deptSel.innerHTML+=`<option value="${d.id}">${d.name}</option>`;});
+    const user=CMS.getUser();
+    if(user&&(user.role==='ADMIN'||user.role==='MANAGER')){
+      employees=await CMS.fetchApi('/api/employees');
+      const empSel=document.getElementById('assignEmpId');
+      employees.forEach(e=>{empSel.innerHTML+=`<option value="${e.id}">${e.firstName} ${e.lastName} (${e.employeeCode})</option>`;});
+    }
+    await loadProjects();
+  }catch(e){CMS.showToast(e.message,'error');}
+}
+
+async function loadProjects(){
+  try{
+    const list=await CMS.fetchApi('/api/projects');
+    const tb=document.getElementById('projTbody');tb.innerHTML='';
+    const user=CMS.getUser();const canEdit=user&&(user.role==='ADMIN'||user.role==='MANAGER');
+    list.forEach(p=>{
+      const tr=document.createElement('tr');
+      const teamNames=(p.assignedEmployees||[]).map(e=>e.firstName+' '+e.lastName).join(', ')||'No assignments';
+      tr.innerHTML=`<td><strong>${p.name}</strong><div style="font-size:12px;color:var(--text-muted);">${(p.description||'').substring(0,60)}</div></td>
+        <td><span class="badge badge-inquiry">${p.departmentName||''}</span></td>
+        <td>${CMS.formatDate(p.startDate)}</td><td>${CMS.formatDate(p.endDate)}</td>
+        <td>${CMS.getStatusBadge(p.status)}</td>
+        <td style="font-size:13px;">${teamNames}</td>
+        <td style="text-align:right;">${canEdit?`<button class="btn btn-outline btn-sm" onclick="openAssign(${p.id})"><i class="fa-solid fa-user-plus"></i></button> <button class="btn btn-outline btn-sm" onclick='editP(${JSON.stringify(p).replace(/'/g,"&#39;")})'><i class="fa-solid fa-pen"></i></button>`:''}</td>`;
+      tb.appendChild(tr);
+    });
+  }catch(e){CMS.showToast(e.message,'error');}
+}
+
+function openModal(){document.getElementById('projModalTitle').textContent='Create Project';document.getElementById('projId').value='';document.getElementById('projForm').reset();document.getElementById('projStart').value=new Date().toISOString().split('T')[0];document.getElementById('projModal').style.display='flex';}
+function closeModal(){document.getElementById('projModal').style.display='none';}
+function editP(p){document.getElementById('projModalTitle').textContent='Edit Project';document.getElementById('projId').value=p.id;document.getElementById('projName').value=p.name;document.getElementById('projDesc').value=p.description||'';document.getElementById('projDeptId').value=p.departmentId||'';document.getElementById('projStatus').value=p.status||'PLANNED';document.getElementById('projStart').value=p.startDate||'';document.getElementById('projEnd').value=p.endDate||'';document.getElementById('projModal').style.display='flex';}
+
+document.getElementById('projForm').addEventListener('submit',async e=>{
+  e.preventDefault();const id=document.getElementById('projId').value;
+  const payload={name:document.getElementById('projName').value.trim(),description:document.getElementById('projDesc').value.trim(),departmentId:parseInt(document.getElementById('projDeptId').value),status:document.getElementById('projStatus').value,startDate:document.getElementById('projStart').value,endDate:document.getElementById('projEnd').value||null};
+  try{if(id){await CMS.fetchApi(`/api/projects/${id}`,{method:'PUT',body:JSON.stringify(payload)});CMS.showToast('Updated','success');}else{await CMS.fetchApi('/api/projects',{method:'POST',body:JSON.stringify(payload)});CMS.showToast('Created','success');}closeModal();loadProjects();}catch(e){CMS.showToast(e.message,'error');}
+});
+
+function openAssign(projId){document.getElementById('assignProjId').value=projId;document.getElementById('assignModal').style.display='flex';}
+document.getElementById('assignForm').addEventListener('submit',async e=>{
+  e.preventDefault();const projId=document.getElementById('assignProjId').value;const empId=parseInt(document.getElementById('assignEmpId').value);
+  try{await CMS.fetchApi(`/api/projects/${projId}/assignments`,{method:'POST',body:JSON.stringify({employeeId:empId})});CMS.showToast('Employee assigned','success');document.getElementById('assignModal').style.display='none';loadProjects();}catch(e){CMS.showToast(e.message,'error');}
+});
+
+document.addEventListener('DOMContentLoaded',init);
+</script>
+</body>
+</html>

@@ -2,6 +2,7 @@ import pandas as pd
 import json
 import plotly.graph_objects as go
 import plotly.express as px
+from sqlalchemy import text
 from ..db import engine
 
 def build_kpi_metrics(region: str = None, from_date: str = None, to_date: str = None):
@@ -14,11 +15,13 @@ def build_kpi_metrics(region: str = None, from_date: str = None, to_date: str = 
     FROM fact_sales_order f
     WHERE f.order_status IN ('CONFIRMED', 'PAID', 'DELIVERED')
     """
+    params = {}
     if region and region.upper() != "ALL":
-        query += f" AND f.region = '{region}'"
+        query += " AND f.region = :region"
+        params["region"] = region.upper()
         
     with engine.connect() as conn:
-        df_kpi = pd.read_sql(query, conn)
+        df_kpi = pd.read_sql(text(query), conn, params=params)
         
     rev = float(df_kpi["total_revenue"].iloc[0])
     prof = float(df_kpi["total_profit"].iloc[0])
@@ -28,7 +31,7 @@ def build_kpi_metrics(region: str = None, from_date: str = None, to_date: str = 
     
     # Feedback average rating
     with engine.connect() as conn:
-        df_fb = pd.read_sql("SELECT COALESCE(AVG(rating), 4.2) as avg_rating FROM fact_feedback", conn)
+        df_fb = pd.read_sql(text("SELECT COALESCE(AVG(rating), 4.2) as avg_rating FROM fact_feedback"), conn)
     avg_rating = round(float(df_fb["avg_rating"].iloc[0]), 2)
     
     return {
@@ -54,15 +57,18 @@ def build_sales_trend_chart(region: str = None, category: str = None):
     JOIN dim_product p ON f.product_key = p.product_key
     WHERE f.order_status IN ('CONFIRMED', 'PAID', 'DELIVERED')
     """
+    params = {}
     if region and region.upper() != "ALL":
-        query += f" AND f.region = '{region}'"
+        query += " AND f.region = :region"
+        params["region"] = region.upper()
     if category and category.upper() != "ALL":
-        query += f" AND p.category = '{category}'"
+        query += " AND p.category = :category"
+        params["category"] = category
         
     query += " GROUP BY d.year, d.month, d.month_name ORDER BY d.year ASC, d.month ASC"
     
     with engine.connect() as conn:
-        df = pd.read_sql(query, conn)
+        df = pd.read_sql(text(query), conn, params=params)
         
     if df.empty:
         df = pd.DataFrame({"month_str": ["2026-01"], "revenue": [0], "profit": [0]})
@@ -103,12 +109,14 @@ def build_regional_comparison_chart(category: str = None):
     JOIN dim_product p ON f.product_key = p.product_key
     WHERE f.order_status IN ('CONFIRMED', 'PAID', 'DELIVERED')
     """
+    params = {}
     if category and category.upper() != "ALL":
-        query += f" AND p.category = '{category}'"
+        query += " AND p.category = :category"
+        params["category"] = category
     query += " GROUP BY f.region ORDER BY revenue DESC"
     
     with engine.connect() as conn:
-        df = pd.read_sql(query, conn)
+        df = pd.read_sql(text(query), conn, params=params)
         
     fig = go.Figure()
     fig.add_trace(go.Bar(
@@ -134,12 +142,14 @@ def build_sales_funnel_chart(region: str = None):
     SELECT order_status, COUNT(*) as count
     FROM fact_sales_order
     """
+    params = {}
     if region and region.upper() != "ALL":
-        query += f" WHERE region = '{region}'"
+        query += " WHERE region = :region"
+        params["region"] = region.upper()
     query += " GROUP BY order_status"
     
     with engine.connect() as conn:
-        df = pd.read_sql(query, conn)
+        df = pd.read_sql(text(query), conn, params=params)
         
     stage_order = ["INQUIRY", "QUOTED", "CONFIRMED", "PAID", "DELIVERED"]
     counts_map = dict(zip(df["order_status"], df["count"]))

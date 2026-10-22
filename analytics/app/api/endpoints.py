@@ -1,5 +1,7 @@
-from fastapi import APIRouter, Depends, Header, HTTPException, Query
+import hmac
+import logging
 from typing import Optional
+from fastapi import APIRouter, Depends, Header, HTTPException, Query
 from ..config import settings
 from ..etl.pipeline import run_etl_pipeline
 from ..models.forecast import compute_sales_forecast
@@ -14,13 +16,16 @@ from ..charts.plotly_builder import (
 )
 from ..charts.seaborn_builder import generate_seaborn_plots
 
+logger = logging.getLogger("cms_analytics.endpoints")
 router = APIRouter()
 
 def verify_internal_key(x_internal_key: Optional[str] = Header(None)):
-    # Internal communication key verification (can be disabled in dev mode)
-    if settings.INTERNAL_API_KEY and x_internal_key:
-        if x_internal_key != settings.INTERNAL_API_KEY:
-            raise HTTPException(status_code=403, detail="Invalid internal API key")
+    # Internal communication key verification using constant-time comparison
+    if settings.INTERNAL_API_KEY:
+        if not x_internal_key or not hmac.compare_digest(
+            x_internal_key.strip(), settings.INTERNAL_API_KEY.strip()
+        ):
+            raise HTTPException(status_code=403, detail="Invalid or missing internal API key")
     return True
 
 @router.get("/health")
@@ -33,16 +38,18 @@ def trigger_etl(_=Depends(verify_internal_key)):
     return result
 
 @router.get("/etl/status")
-def get_etl_status():
+def get_etl_status(_=Depends(verify_internal_key)):
     from ..db import engine
     from sqlalchemy import text
     try:
         with engine.connect() as conn:
-            row = conn.execute(text("SELECT * FROM etl_runs_log ORDER BY run_id DESC LIMIT 1")).mappings().fetchone()
+            row = conn.execute(
+                text("SELECT * FROM etl_runs_log ORDER BY run_id DESC LIMIT 1")
+            ).mappings().fetchone()
             if row:
                 return dict(row)
-    except Exception:
-        pass
+    except Exception as e:
+        logger.warning(f"Error checking ETL status: {e}")
     return {"status": "READY", "message": "No ETL run recorded yet"}
 
 @router.get("/analytics/kpis")

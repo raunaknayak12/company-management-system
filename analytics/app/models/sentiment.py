@@ -3,6 +3,8 @@ from collections import Counter
 import re
 from ..db import engine
 
+from sqlalchemy import text
+
 STOPWORDS = {
     "the", "and", "a", "to", "of", "in", "is", "for", "with", "our", "we", "this",
     "that", "it", "on", "as", "at", "by", "an", "be", "was", "are", "from", "or",
@@ -23,11 +25,13 @@ def compute_sentiment_analysis(product_id: int = None):
     FROM fact_feedback fb
     JOIN dim_date d ON fb.date_key = d.date_key
     """
+    params = {}
     if product_id:
-        query += f" WHERE fb.product_key = {product_id}"
+        query += " WHERE fb.product_key = :product_id"
+        params["product_id"] = int(product_id)
         
     with engine.connect() as conn:
-        df = pd.read_sql(query, conn)
+        df = pd.read_sql(text(query), conn, params=params)
         
     if df.empty:
         return {

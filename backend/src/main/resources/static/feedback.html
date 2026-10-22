@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CMS — Customer Feedback & Sentiment</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div class="app-container">
+  <aside class="sidebar">
+    <div class="sidebar-header"><div class="sidebar-logo-icon"><i class="fa-solid fa-cube"></i></div><div><div class="sidebar-brand-name">CMS Portal</div><div class="sidebar-brand-sub">Enterprise Suite</div></div></div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-title">Core Management</div>
+      <a href="index.html" class="nav-link"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+      <a href="employees.html" class="nav-link" data-role="ADMIN,MANAGER"><i class="fa-solid fa-id-badge"></i> Employees</a>
+      <a href="departments.html" class="nav-link"><i class="fa-solid fa-sitemap"></i> Departments</a>
+      <a href="projects.html" class="nav-link"><i class="fa-solid fa-diagram-project"></i> Projects</a>
+      <div class="nav-section-title">Commercial & CRM</div>
+      <a href="customers.html" class="nav-link" data-role="ADMIN,MANAGER"><i class="fa-solid fa-users"></i> Customers</a>
+      <a href="products.html" class="nav-link"><i class="fa-solid fa-box-archive"></i> Products</a>
+      <a href="orders.html" class="nav-link"><i class="fa-solid fa-cart-shopping"></i> Sales Orders</a>
+      <a href="feedback.html" class="nav-link active" data-role="ADMIN,MANAGER"><i class="fa-solid fa-comment-dots"></i> Feedback</a>
+      <div class="nav-section-title" data-role="ADMIN,MANAGER">Intelligence & Admin</div>
+      <a href="analytics.html" class="nav-link" data-role="ADMIN,MANAGER"><i class="fa-solid fa-chart-line"></i> Analytics & BI</a>
+      <a href="users.html" class="nav-link" data-role="ADMIN"><i class="fa-solid fa-user-gear"></i> System Users</a>
+    </nav>
+    <div class="sidebar-footer"><div class="user-badge"><div class="user-avatar" id="sidebarUserAvatar">A</div><div class="user-info-text"><div class="user-name-label" id="sidebarUserName">Loading...</div><div class="user-role-pill" id="sidebarUserRole">ADMIN</div></div></div><button class="btn-logout" onclick="CMS.logout()"><i class="fa-solid fa-right-from-bracket"></i></button></div>
+  </aside>
+  <main class="main-wrapper">
+    <header class="top-navbar">
+      <div class="page-title-area"><h1>Customer Feedback & Sentiment</h1><p>Voice of customer reviews, NLP sentiment analysis, and CSAT scores</p></div>
+      <div class="top-actions"><button class="btn btn-primary btn-sm" onclick="openModal()"><i class="fa-solid fa-plus"></i> Submit Feedback</button></div>
+    </header>
+    <div class="content-body">
+      <!-- Summary Stats -->
+      <div class="stats-grid" style="grid-template-columns:repeat(4,1fr);">
+        <div class="stat-card stat-card-border-success"><div class="stat-header"><span class="stat-label">Avg Rating</span><div class="stat-icon stat-icon-success"><i class="fa-solid fa-star"></i></div></div><div class="stat-value" id="avgRating">—</div></div>
+        <div class="stat-card stat-card-border-primary"><div class="stat-header"><span class="stat-label">Total Reviews</span><div class="stat-icon stat-icon-primary"><i class="fa-solid fa-comments"></i></div></div><div class="stat-value" id="totalReviews">0</div></div>
+        <div class="stat-card stat-card-border-info"><div class="stat-header"><span class="stat-label">Positive %</span><div class="stat-icon stat-icon-info"><i class="fa-solid fa-face-smile"></i></div></div><div class="stat-value" id="positivePct">—</div></div>
+        <div class="stat-card stat-card-border-warning"><div class="stat-header"><span class="stat-label">Negative %</span><div class="stat-icon stat-icon-warning"><i class="fa-solid fa-face-frown"></i></div></div><div class="stat-value" id="negativePct">—</div></div>
+      </div>
+
+      <div class="card-box"><div class="card-box-body" style="padding:0;">
+        <table class="custom-table">
+          <thead><tr><th>Customer</th><th>Product</th><th>Rating</th><th>Review</th><th>Sentiment</th><th>Date</th><th style="text-align:right">Actions</th></tr></thead>
+          <tbody id="fbTbody"><tr><td colspan="7" style="text-align:center;padding:30px;color:var(--text-muted);">Loading reviews...</td></tr></tbody>
+        </table>
+      </div></div>
+    </div>
+  </main>
+</div>
+
+<div class="modal-overlay" id="fbModal">
+  <div class="modal-card">
+    <div class="modal-header"><h3 style="font-size:16px;font-weight:700;">Submit Customer Feedback</h3><button onclick="closeModal()" style="background:transparent;border:none;font-size:20px;cursor:pointer;">&times;</button></div>
+    <form id="fbForm">
+      <div class="modal-body">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+          <div><label class="form-label">Customer *</label><select id="fbCustomerId" class="form-select" required style="width:100%;"></select></div>
+          <div><label class="form-label">Product</label><select id="fbProductId" class="form-select" style="width:100%;"><option value="">— None —</option></select></div>
+        </div>
+        <div><label class="form-label">Rating (1–5) *</label><input type="number" id="fbRating" class="form-control" min="1" max="5" required style="width:100%;"></div>
+        <div><label class="form-label">Review Text *</label><textarea id="fbText" class="form-control" rows="3" required style="width:100%;"></textarea></div>
+      </div>
+      <div class="modal-footer"><button type="button" class="btn btn-outline" onclick="closeModal()">Cancel</button><button type="submit" class="btn btn-primary">Submit</button></div>
+    </form>
+  </div>
+</div>
+
+<script src="/js/app.js"></script>
+<script>
+async function init(){
+  try{
+    const customers=await CMS.fetchApi('/api/customers');
+    const products=await CMS.fetchApi('/api/products');
+    const cSel=document.getElementById('fbCustomerId');
+    customers.forEach(c=>{cSel.innerHTML+=`<option value="${c.id}">${c.companyName}</option>`;});
+    const pSel=document.getElementById('fbProductId');
+    products.forEach(p=>{pSel.innerHTML+=`<option value="${p.id}">${p.name}</option>`;});
+    await loadFeedback();
+  }catch(e){CMS.showToast(e.message,'error');}
+}
+
+async function loadFeedback(){
+  try{
+    const list=await CMS.fetchApi('/api/feedback');
+    const tb=document.getElementById('fbTbody');tb.innerHTML='';
+    const user=CMS.getUser();const isAdmin=user&&user.role==='ADMIN';
+
+    if(list.length){
+      let sumR=0,pos=0,neg=0;
+      list.forEach(f=>{sumR+=f.rating;if(f.sentimentLabel==='POSITIVE')pos++;if(f.sentimentLabel==='NEGATIVE')neg++;});
+      document.getElementById('avgRating').textContent=(sumR/list.length).toFixed(1)+' / 5';
+      document.getElementById('totalReviews').textContent=list.length;
+      document.getElementById('positivePct').textContent=((pos/list.length)*100).toFixed(0)+'%';
+      document.getElementById('negativePct').textContent=((neg/list.length)*100).toFixed(0)+'%';
+    }
+
+    const renderStars = (rating) => {
+      let s = '';
+      for (let i = 1; i <= 5; i++) {
+        const isFilled = i <= rating;
+        s += `<svg style="width:13px;height:13px;vertical-align:-1px;margin-right:2px;" viewBox="0 0 24 24" fill="${isFilled ? '#f59e0b' : 'none'}" stroke="#f59e0b" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>`;
+      }
+      return s;
+    };
+
+    list.forEach(f=>{
+      const tr=document.createElement('tr');
+      tr.innerHTML=`<td><strong>${f.customerName}</strong></td><td>${f.productName||'General'}</td>
+        <td><span>${renderStars(f.rating)}</span></td>
+        <td style="max-width:280px;font-size:13px;color:var(--text-muted);">"${f.reviewText}"</td>
+        <td>${CMS.getStatusBadge(f.sentimentLabel)} <span style="font-size:11px;color:var(--text-muted);">${f.sentimentScore!=null?f.sentimentScore.toFixed(2):''}</span></td>
+        <td>${CMS.formatDate(f.createdAt)}</td>
+        <td style="text-align:right;">${isAdmin?`<button class="btn btn-outline btn-sm" style="color:var(--danger);" onclick="delFb(${f.id})"><i class="fa-solid fa-trash"></i></button>`:''}</td>`;
+      tb.appendChild(tr);
+    });
+  }catch(e){CMS.showToast(e.message,'error');}
+}
+
+function openModal(){document.getElementById('fbForm').reset();document.getElementById('fbModal').style.display='flex';}
+function closeModal(){document.getElementById('fbModal').style.display='none';}
+
+document.getElementById('fbForm').addEventListener('submit',async e=>{
+  e.preventDefault();
+  const payload={customerId:parseInt(document.getElementById('fbCustomerId').value),productId:document.getElementById('fbProductId').value?parseInt(document.getElementById('fbProductId').value):null,rating:parseInt(document.getElementById('fbRating').value),reviewText:document.getElementById('fbText').value.trim()};
+  try{await CMS.fetchApi('/api/feedback',{method:'POST',body:JSON.stringify(payload)});CMS.showToast('Feedback submitted','success');closeModal();loadFeedback();}catch(e){CMS.showToast(e.message,'error');}
+});
+
+async function delFb(id){if(!confirm('Delete this feedback?'))return;try{await CMS.fetchApi(`/api/feedback/${id}`,{method:'DELETE'});CMS.showToast('Deleted','success');loadFeedback();}catch(e){CMS.showToast(e.message,'error');}}
+
+document.addEventListener('DOMContentLoaded',init);
+</script>
+</body>
+</html>

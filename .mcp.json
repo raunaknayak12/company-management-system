@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "mustel": {
+      "command": "C:\\Users\\Raunak\\AppData\\Local\\Programs\\Python\\Python312\\python.exe",
+      "args": [
+        "-m",
+        "mustel",
+        "serve"
+      ],
+      "description": "Mustel \u2014 Agent-Native Linter & Guardrail"
+    }
+  }
+}

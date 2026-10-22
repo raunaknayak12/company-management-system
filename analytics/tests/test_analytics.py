@@ -1,6 +1,9 @@
 import pytest
 from fastapi.testclient import TestClient
-from analytics.app.main import app
+try:
+    from app.main import app
+except ModuleNotFoundError:
+    from analytics.app.main import app
 
 client = TestClient(app)
 
@@ -8,6 +11,12 @@ def test_health():
     response = client.get("/health")
     assert response.status_code == 200
     assert response.json()["status"] == "UP"
+
+def test_unauthorized_access_rejected():
+    # Prompt 6 check: calls without internal key must return 403
+    response = client.get("/analytics/kpis")
+    assert response.status_code == 403
+    assert "Invalid or missing internal API key" in response.json()["detail"]
 
 def test_etl_run():
     response = client.post("/etl/run", headers={"x-internal-key": "cms-internal-analytics-key-2026"})

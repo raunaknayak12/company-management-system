@@ -1,26 +1,63 @@
 version: '3.8'
 
 services:
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  #  PostgreSQL 16  (Operational DB + Data Warehouse)
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   postgres:
     image: postgres:16-alpine
     container_name: cms-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_DB: cms_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgrespassword
+      POSTGRES_DB: ${DB_NAME:-cms_db}
+      POSTGRES_USER: ${POSTGRES_SUPERUSER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_SUPERUSER_PASSWORD:-postgrespassword}
     ports:
-      - "5432:5432"
+      - "${DB_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./db/01_roles.sql:/docker-entrypoint-initdb.d/01_roles.sql
       - ./db/02_dw_schema.sql:/docker-entrypoint-initdb.d/02_dw_schema.sql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d cms_db"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d ${DB_NAME:-cms_db}"]
       interval: 5s
       timeout: 5s
       retries: 5
+    networks:
+      - cms-network
 
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  #  Spring Boot Backend (Java 21)
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: cms-backend
+    restart: unless-stopped
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME:-cms_db}
+      DB_USER: ${DB_USER:-cms_app}
+      DB_PASSWORD: ${DB_PASSWORD:-cmspassword}
+      DB_SSLMODE: ${DB_SSLMODE:-disable}
+      APP_JWT_SECRET: ${JWT_SECRET:-404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
+      APP_JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS:-86400000}
+      APP_ANALYTICS_URL: http://analytics:8000
+      APP_ANALYTICS_INTERNAL_KEY: ${INTERNAL_API_KEY:-cms-internal-analytics-key-2026}
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - cms-network
+
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  #  Python Analytics & ETL Engine (FastAPI)
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   analytics:
     build:
       context: ./analytics
@@ -28,14 +65,40 @@ services:
     container_name: cms-analytics
     restart: unless-stopped
     environment:
-      DATABASE_URL: postgresql://dw_user:dwpassword@postgres:5432/cms_db
-      INTERNAL_API_KEY: cms-internal-analytics-key-2026
+      DATABASE_URL: postgresql://${DW_USER:-dw_user}:${DW_PASSWORD:-dwpassword}@postgres:5432/${DB_NAME:-cms_db}
+      INTERNAL_API_KEY: ${INTERNAL_API_KEY:-cms-internal-analytics-key-2026}
       PORT: 8000
-    ports:
-      - "8000:8000"
     depends_on:
       postgres:
         condition: service_healthy
+    networks:
+      - cms-network
+
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  #  Nginx Reverse Proxy & Load Balancer
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: cms-nginx
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-80}:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - backend
+      - analytics
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost/nginx-health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+    networks:
+      - cms-network
+
+networks:
+  cms-network:
+    driver: bridge
 
 volumes:
   postgres_data:

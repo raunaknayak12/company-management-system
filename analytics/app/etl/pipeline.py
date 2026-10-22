@@ -36,7 +36,7 @@ def run_etl_pipeline():
         # 2. TRANSFORM - Sales Data
         if not df_sales.empty:
             # Data Cleaning & Preprocessing
-            df_sales.drop_duplicates(subset=["order_number"], inplace=True)
+            df_sales = df_sales.drop_duplicates(subset=["order_number"])
             df_sales["order_date"] = pd.to_datetime(df_sales["order_date"])
             df_sales["quantity"] = pd.to_numeric(df_sales["quantity"], errors="coerce").fillna(1).astype(int)
             df_sales["unit_price"] = pd.to_numeric(df_sales["unit_price"], errors="coerce").fillna(0.0)
@@ -64,7 +64,7 @@ def run_etl_pipeline():
                 "month_name": unique_dates.dt.month_name(),
                 "quarter": unique_dates.dt.quarter,
                 "year": unique_dates.dt.year,
-                "is_weekend": unique_dates.dt.dayofweek >= 5
+                "is_weekend": unique_dates.dt.day_of_week >= 5
             })
             
             # Dim Customer
@@ -120,6 +120,14 @@ def run_etl_pipeline():
             df_reviews["date_key"] = df_reviews["created_date"].dt.strftime("%Y%m%d").astype(int)
             df_reviews["rating"] = pd.to_numeric(df_reviews["rating"], errors="coerce").fillna(3).astype(int)
             
+            import re
+            def scrub_pii(t):
+                if not isinstance(t, str): return ""
+                t = re.sub(r'[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+', '[REDACTED_EMAIL]', t)
+                t = re.sub(r'(\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}', '[REDACTED_PHONE]', t)
+                return t
+            df_reviews["review_text"] = df_reviews["review_text"].apply(scrub_pii)
+
             # TextBlob sentiment scoring
             from textblob import TextBlob
             polarities = []
@@ -213,13 +221,20 @@ def run_etl_pipeline():
                 )
             """))
             
-            conn.execute(text(f"""
-                INSERT INTO {log_table} 
+            insert_query = text("""
+                INSERT INTO dw.etl_runs_log 
                 (start_time, end_time, status, rows_extracted_operational, rows_extracted_csv, 
                  rows_loaded_fact_sales, rows_loaded_fact_feedback, rows_rejected, error_message, quality_score)
                 VALUES 
                 (:st, :et, :stat, :reo, :rec, :rls, :rlf, :rej, :err, :qs)
-            """), {
+            """) if is_postgres else text("""
+                INSERT INTO etl_runs_log 
+                (start_time, end_time, status, rows_extracted_operational, rows_extracted_csv, 
+                 rows_loaded_fact_sales, rows_loaded_fact_feedback, rows_rejected, error_message, quality_score)
+                VALUES 
+                (:st, :et, :stat, :reo, :rec, :rls, :rlf, :rej, :err, :qs)
+            """)
+            conn.execute(insert_query, {
                 "st": start_time,
                 "et": end_time,
                 "stat": status,
