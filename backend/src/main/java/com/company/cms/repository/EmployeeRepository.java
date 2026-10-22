@@ -22,9 +22,10 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
     @Query("SELECT e FROM Employee e WHERE " +
            "(:deptId IS NULL OR e.department.id = :deptId) AND " +
            "(:status IS NULL OR e.status = :status) AND " +
-           "(:search IS NULL OR LOWER(e.firstName) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
-           "LOWER(e.lastName) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
-           "LOWER(e.employeeCode) LIKE LOWER(CONCAT('%', :search, '%')))")
+           "(:search IS NULL OR " +
+           "LOWER(e.firstName) LIKE CONCAT('%', :search, '%') OR " +
+           "LOWER(e.lastName) LIKE CONCAT('%', :search, '%') OR " +
+           "LOWER(e.employeeCode) LIKE CONCAT('%', :search, '%'))")
     List<Employee> searchEmployees(
         @Param("deptId") Long deptId,
         @Param("status") String status,

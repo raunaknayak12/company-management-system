@@ -32,25 +32,40 @@ public class EmployeeService {
         this.salesOrderRepository = salesOrderRepository;
     }
 
+    @Transactional(readOnly = true)
     public List<EmployeeResponse> searchEmployees(Long deptId, String status, String search, Role userRole) {
-        List<Employee> list = employeeRepository.searchEmployees(deptId, status, search);
+        boolean hasDept = deptId != null;
+        boolean hasStatus = status != null && !status.isBlank() && !status.equalsIgnoreCase("ALL");
+        boolean hasSearch = search != null && !search.isBlank();
+
+        List<Employee> list;
+        if (!hasDept && !hasStatus && !hasSearch) {
+            list = employeeRepository.findAll();
+        } else {
+            String sVal = hasStatus ? status.trim() : null;
+            String qVal = hasSearch ? search.trim().toLowerCase() : null;
+            list = employeeRepository.searchEmployees(deptId, sVal, qVal);
+        }
         return list.stream()
                 .map(e -> mapToResponse(e, userRole))
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public EmployeeResponse getEmployeeById(Long id, Role userRole) {
         Employee employee = employeeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Employee not found with id: " + id));
         return mapToResponse(employee, userRole);
     }
 
+    @Transactional(readOnly = true)
     public EmployeeResponse getEmployeeByUserId(Long userId, Role userRole) {
         Employee employee = employeeRepository.findByUserId(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("No employee profile linked to user id: " + userId));
         return mapToResponse(employee, userRole);
     }
 
+    @Transactional(readOnly = true)
     public EmployeeResponse getEmployeeByEmail(String email, Role userRole) {
         Employee employee = employeeRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("No employee profile linked to email: " + email));

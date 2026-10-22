@@ -41,6 +41,7 @@ public class SalesOrderService {
         this.statusHistoryRepository = statusHistoryRepository;
     }
 
+    @Transactional(readOnly = true)
     public List<SalesOrderResponse> getOrders(Role role, Long currentEmployeeId, OrderStatus status, String region) {
         List<SalesOrder> orders;
         if (role == Role.EMPLOYEE) {
@@ -59,6 +60,7 @@ public class SalesOrderService {
         return orders.stream().map(this::mapToResponse).collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public SalesOrderResponse getOrderById(Long id, Role role, Long currentEmployeeId) {
         SalesOrder order = salesOrderRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Sales Order not found with id: " + id));

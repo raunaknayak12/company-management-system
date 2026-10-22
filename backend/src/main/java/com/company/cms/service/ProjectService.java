@@ -33,6 +33,7 @@ public class ProjectService {
         this.employeeRepository = employeeRepository;
     }
 
+    @Transactional(readOnly = true)
     public List<ProjectResponse> getProjectsForUser(Role role, Long employeeId) {
         if (role == Role.EMPLOYEE && employeeId != null) {
             // FR-PRJ-3: Employee sees only assigned projects
@@ -45,6 +46,7 @@ public class ProjectService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public ProjectResponse getProjectById(Long id) {
         Project project = projectRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Project not found with id: " + id));
