@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: cms-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: cms_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespassword
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./db/01_roles.sql:/docker-entrypoint-initdb.d/01_roles.sql
+      - ./db/02_dw_schema.sql:/docker-entrypoint-initdb.d/02_dw_schema.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d cms_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  analytics:
+    build:
+      context: ./analytics
+      dockerfile: Dockerfile
+    container_name: cms-analytics
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://dw_user:dwpassword@postgres:5432/cms_db
+      INTERNAL_API_KEY: cms-internal-analytics-key-2026
+      PORT: 8000
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
