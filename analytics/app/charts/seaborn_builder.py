@@ -47,7 +47,7 @@ def generate_seaborn_plots():
     sns.boxplot(x="category", y="profit_amount", data=df, palette="Set2")
     plt.title("Net Profit Spread by Product Category", fontsize=12, pad=12)
     plt.xlabel("Category")
-    plt.ylabel("Profit Amount ($)")
+    plt.ylabel("Profit Amount (₹)")
     plt.xticks(rotation=15)
     plt.tight_layout()
     

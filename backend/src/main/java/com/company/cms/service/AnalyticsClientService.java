@@ -80,20 +80,31 @@ public class AnalyticsClientService {
     }
 
     private Object get(String path) {
-        try {
-            return restClient.get()
-                    .uri(analyticsServiceUrl + path)
-                    .header("x-internal-key", internalApiKey)
-                    .accept(MediaType.APPLICATION_JSON)
-                    .retrieve()
-                    .body(Object.class);
-        } catch (Exception e) {
-            log.warn("Analytics service unavailable for path: {}. Error: {}", path, e.getMessage());
-            return Map.of(
-                    "status", "UNAVAILABLE",
-                    "message", "Analytics engine temporarily unavailable. Please start the Python analytics service on port 8000."
-            );
+        int maxRetries = 2;
+        Exception lastException = null;
+        for (int attempt = 0; attempt < maxRetries; attempt++) {
+            try {
+                return restClient.get()
+                        .uri(analyticsServiceUrl + path)
+                        .header("x-internal-key", internalApiKey)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .retrieve()
+                        .body(Object.class);
+            } catch (Exception e) {
+                lastException = e;
+                log.warn("Analytics GET attempt {}/{} failed for path: {}. Error: {}",
+                        attempt + 1, maxRetries, path, e.getMessage());
+                if (attempt < maxRetries - 1) {
+                    try { Thread.sleep(5000); } catch (InterruptedException ie) { Thread.currentThread().interrupt(); }
+                }
+            }
         }
+        log.error("Analytics service unavailable after {} retries for path: {}. Last error: {}",
+                maxRetries, path, lastException != null ? lastException.getMessage() : "unknown");
+        return Map.of(
+                "status", "UNAVAILABLE",
+                "message", "Analytics engine temporarily unavailable. The service may be starting up — please retry in 30 seconds."
+        );
     }
 
     private Object post(String path) {

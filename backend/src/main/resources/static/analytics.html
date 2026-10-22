@@ -154,19 +154,19 @@
 
         <div class="stats-grid" id="analyticsKpisGrid">
           <div class="stat-card stat-card-border-primary">
-            <div class="stat-header"><span class="stat-label">Warehouse Revenue</span><div class="stat-icon stat-icon-primary"><i class="fa-solid fa-dollar-sign"></i></div></div>
-            <div class="stat-value" id="kpiGrossRev">$0.00</div>
+            <div class="stat-header"><span class="stat-label">Warehouse Revenue</span><div class="stat-icon stat-icon-primary"><i class="fa-solid fa-indian-rupee-sign"></i></div></div>
+            <div class="stat-value" id="kpiGrossRev">₹0.00</div>
             <div class="stat-subtext" id="kpiGrowthText"><i class="fa-solid fa-arrow-trend-up" style="color:var(--success)"></i> +12.8% growth rate</div>
           </div>
           <div class="stat-card stat-card-border-success">
             <div class="stat-header"><span class="stat-label">Net Profit Amount</span><div class="stat-icon stat-icon-success"><i class="fa-solid fa-wallet"></i></div></div>
-            <div class="stat-value" id="kpiGrossProfit">$0.00</div>
+            <div class="stat-value" id="kpiGrossProfit">₹0.00</div>
             <div class="stat-subtext" id="kpiMarginText">Margin: 0.0%</div>
           </div>
           <div class="stat-card stat-card-border-warning">
             <div class="stat-header"><span class="stat-label">Fulfilled Orders</span><div class="stat-icon stat-icon-warning"><i class="fa-solid fa-boxes-packing"></i></div></div>
             <div class="stat-value" id="kpiTotalOrders">0</div>
-            <div class="stat-subtext" id="kpiAovText">Avg order: $0.00</div>
+            <div class="stat-subtext" id="kpiAovText">Avg order: ₹0.00</div>
           </div>
           <div class="stat-card stat-card-border-info">
             <div class="stat-header"><span class="stat-label">Client CSAT Rating</span><div class="stat-icon stat-icon-info"><i class="fa-solid fa-star"></i></div></div>
@@ -506,8 +506,8 @@
       const data = await CMS.fetchApi(`/api/analytics/kpis?region=${region}`);
       if (handleServiceUnavailable(data)) {
         // Fallback UI
-        document.getElementById('kpiGrossRev').textContent = '$142,500.00';
-        document.getElementById('kpiGrossProfit').textContent = '$49,875.00';
+        document.getElementById('kpiGrossRev').textContent = '₹1,42,500.00';
+        document.getElementById('kpiGrossProfit').textContent = '₹49,875.00';
         document.getElementById('kpiTotalOrders').textContent = '5';
         document.getElementById('kpiAvgRating').textContent = '4.6 / 5.0';
         return;
@@ -616,7 +616,7 @@
       const layout = {
         title: 'Sales Forecast Projection with Confidence Envelope',
         xaxis: { title: 'Timeline' },
-        yaxis: { title: 'Revenue ($ USD)' },
+        yaxis: { title: 'Revenue (₹ INR)' },
         template: 'plotly_white',
         margin: { l: 50, r: 40, t: 50, b: 40 }
       };
@@ -667,7 +667,7 @@
       const layout = {
         title: 'Customer RFM Segmentation: Monetary Spend vs Order Frequency',
         xaxis: { title: 'Order Frequency (Count)' },
-        yaxis: { title: 'Monetary Spend ($ USD)' },
+        yaxis: { title: 'Monetary Spend (₹ INR)' },
         template: 'plotly_white',
         margin: { l: 50, r: 40, t: 50, b: 40 }
       };

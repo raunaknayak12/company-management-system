@@ -180,7 +180,7 @@
       const fulfillmentRate = totalOrders > 0 ? Math.round((deliveredOrders / totalOrders) * 100) : 0;
       const totalSales = Number(data.totalSales || 0);
 
-      // Quota benchmark ($150,000 for demo benchmark)
+      // Quota benchmark (₹1,50,000 for demo benchmark)
       const benchmarkQuota = 150000;
       const quotaAchievedPct = Math.min(Math.round((totalSales / benchmarkQuota) * 100), 200);
 
@@ -211,7 +211,7 @@
           <div class="stat-card stat-card-border-primary">
             <div class="stat-header">
               <span class="stat-label">Personal Sales Volume</span>
-              <div class="stat-icon stat-icon-primary"><i class="fa-solid fa-dollar-sign"></i></div>
+              <div class="stat-icon stat-icon-primary"><i class="fa-solid fa-indian-rupee-sign"></i></div>
             </div>
             <div class="stat-value">${CMS.formatCurrency(totalSales)}</div>
             <div class="stat-subtext"><i class="fa-solid fa-chart-line" style="color:var(--success)"></i> Total closed order revenue</div>
@@ -264,7 +264,7 @@
                 <div class="progress-bar-fill" style="width: ${Math.min(quotaAchievedPct, 100)}%;"></div>
               </div>
               <div style="display:flex; justify-content:space-between; font-size:12px; color:var(--text-muted); margin-top:8px;">
-                <span>$0.00 Base</span>
+                <span>₹0.00 Base</span>
                 <span>Current: ${CMS.formatCurrency(totalSales)}</span>
                 <span>Target: ${CMS.formatCurrency(benchmarkQuota)}</span>
               </div>

@@ -78,20 +78,20 @@ def build_sales_trend_chart(region: str = None, category: str = None):
     fig = go.Figure()
     fig.add_trace(go.Scatter(
         x=df["month_str"], y=df["revenue"],
-        mode="lines+markers", name="Revenue ($)",
+        mode="lines+markers", name="Revenue (₹)",
         line=dict(color="#4361ee", width=3),
         marker=dict(size=6)
     ))
     fig.add_trace(go.Scatter(
         x=df["month_str"], y=df["profit"],
-        mode="lines+markers", name="Net Profit ($)",
+        mode="lines+markers", name="Net Profit (₹)",
         line=dict(color="#2ec4b6", width=2.5, dash="dash"),
         marker=dict(size=6)
     ))
     fig.update_layout(
         title="Revenue & Net Profit Trend Over Time",
         xaxis_title="Billing Month",
-        yaxis_title="Amount ($ USD)",
+        yaxis_title="Amount (₹ INR)",
         hovermode="x unified",
         template="plotly_white",
         margin=dict(l=40, r=40, t=50, b=40),
@@ -131,7 +131,7 @@ def build_regional_comparison_chart(category: str = None):
         barmode="group",
         title="Performance Across Geographic Sales Regions",
         xaxis_title="Geographic Region",
-        yaxis_title="Amount ($ USD)",
+        yaxis_title="Amount (₹ INR)",
         template="plotly_white",
         margin=dict(l=40, r=40, t=50, b=40)
     )
