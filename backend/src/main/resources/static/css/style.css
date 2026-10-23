@@ -622,50 +622,7 @@ body {
 /* ═══════════════════════════════════════════════════════════════
    High-Level Enterprise Executive Cockpit & Analytics Theme
    ═══════════════════════════════════════════════════════════════ */
-.exec-hero-banner {
-  background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 60%, #312e81 100%);
-  color: white;
-  border-radius: var(--radius-lg);
-  padding: 24px 28px;
-  margin-bottom: 24px;
-  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.25);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 20px;
-  position: relative;
-  overflow: hidden;
-}
 
-.exec-hero-banner::after {
-  content: '';
-  position: absolute;
-  top: -60px;
-  right: -60px;
-  width: 220px;
-  height: 220px;
-  background: radial-gradient(circle, rgba(99, 102, 241, 0.25) 0%, transparent 70%);
-  pointer-events: none;
-}
-
-.exec-hero-title {
-  font-size: 22px;
-  font-weight: 800;
-  letter-spacing: -0.5px;
-  margin-bottom: 6px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.exec-hero-subtitle {
-  color: #94a3b8;
-  font-size: 13px;
-  font-weight: 400;
-  max-width: 600px;
-  line-height: 1.5;
-}
 
 .exec-telemetry-cluster {
   display: flex;

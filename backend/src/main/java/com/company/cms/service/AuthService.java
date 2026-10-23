@@ -113,4 +113,25 @@ public class AuthService {
         user = userRepository.save(user);
         return new UserResponse(user.getId(), user.getEmail(), user.getRole(), user.isActive());
     }
+
+    @Transactional
+    public void deleteUser(Long userId, String currentUsername) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
+
+        if (currentUsername != null && user.getEmail().equalsIgnoreCase(currentUsername)) {
+            throw new BadRequestException("You cannot delete your own account.");
+        }
+
+        if (user.getRole() == Role.ADMIN) {
+            long activeAdminCount = userRepository.findAll().stream()
+                    .filter(u -> u.getRole() == Role.ADMIN && u.isActive())
+                    .count();
+            if (activeAdminCount <= 1) {
+                throw new BadRequestException("Cannot delete the last remaining active Administrator account.");
+            }
+        }
+
+        userRepository.delete(user);
+    }
 }

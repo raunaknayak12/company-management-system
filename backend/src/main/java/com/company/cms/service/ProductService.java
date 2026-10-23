@@ -79,7 +79,14 @@ public class ProductService {
     public void deleteProduct(Long id) {
         Product p = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
-        productRepository.delete(p);
+        try {
+            productRepository.delete(p);
+            productRepository.flush();
+        } catch (org.springframework.dao.DataIntegrityViolationException ex) {
+            // Soft-deactivate to preserve historical order items & analytics
+            p.setActive(false);
+            productRepository.save(p);
+        }
     }
 
     private ProductResponse mapToResponse(Product p) {

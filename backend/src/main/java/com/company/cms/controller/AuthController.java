@@ -62,4 +62,12 @@ public class AuthController {
     public ResponseEntity<UserResponse> toggleUser(@PathVariable Long id) {
         return ResponseEntity.ok(authService.toggleUserActive(id));
     }
+
+    @DeleteMapping("/users/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Admin: Delete a user account")
+    public ResponseEntity<Void> deleteUser(@PathVariable Long id, @AuthenticationPrincipal UserDetails userDetails) {
+        authService.deleteUser(id, userDetails != null ? userDetails.getUsername() : null);
+        return ResponseEntity.noContent().build();
+    }
 }

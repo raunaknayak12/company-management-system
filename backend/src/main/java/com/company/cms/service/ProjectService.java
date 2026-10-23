@@ -117,6 +117,10 @@ public class ProjectService {
     public void deleteProject(Long id) {
         Project p = projectRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Project not found with id: " + id));
+        if (p.getAssignedEmployees() != null) {
+            p.getAssignedEmployees().clear();
+            projectRepository.save(p);
+        }
         projectRepository.delete(p);
     }
 

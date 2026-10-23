@@ -15,9 +15,14 @@ import java.util.stream.Collectors;
 public class CustomerService {
 
     private final CustomerRepository customerRepository;
+    private final com.company.cms.repository.SalesOrderRepository salesOrderRepository;
 
-    public CustomerService(CustomerRepository customerRepository) {
+    public CustomerService(
+            CustomerRepository customerRepository,
+            com.company.cms.repository.SalesOrderRepository salesOrderRepository
+    ) {
         this.customerRepository = customerRepository;
+        this.salesOrderRepository = salesOrderRepository;
     }
 
     public List<CustomerResponse> getAllCustomers(String region) {
@@ -73,6 +78,12 @@ public class CustomerService {
     public void deleteCustomer(Long id) {
         Customer c = customerRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Customer not found with id: " + id));
+
+        var orders = salesOrderRepository.findByCustomerId(id);
+        if (!orders.isEmpty()) {
+            throw new ConflictException("Cannot delete customer '" + c.getCompanyName() + "' because they have " + orders.size() + " active sales orders. Please cancel or reassign orders first.");
+        }
+
         customerRepository.delete(c);
     }
 

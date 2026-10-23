@@ -72,30 +72,41 @@ def build_sales_trend_chart(region: str = None, category: str = None):
         df = pd.read_sql(text(query), conn, params=params)
         
     if df.empty:
-        df = pd.DataFrame({"month_str": ["2026-01"], "revenue": [0], "profit": [0]})
+        df = pd.DataFrame({"month_str": ["2026-01"], "revenue": [0.0], "profit": [0.0], "margin_pct": [0.0]})
     else:
         df["month_str"] = df["year"].astype(str) + "-" + df["month"].astype(str).str.zfill(2)
+        df["revenue"] = df["revenue"].astype(float)
+        df["profit"] = df["profit"].astype(float)
+        df["margin_pct"] = np.where(df["revenue"] > 0, np.round((df["profit"] / df["revenue"]) * 100, 1), 0.0)
         
     fig = go.Figure()
-    fig.add_trace(go.Scatter(
+    # 1. Revenue rendered as distinct Indigo Bar Column Elements
+    fig.add_trace(go.Bar(
         x=df["month_str"], y=df["revenue"],
-        mode="lines+markers", name="Revenue (₹)",
-        line=dict(color="#4361ee", width=3),
-        marker=dict(size=6)
+        name="Revenue (₹)",
+        marker=dict(
+            color="rgba(79, 70, 229, 0.75)",
+            line=dict(color="#4338ca", width=1.5)
+        ),
+        hovertemplate="<b>%{x}</b><br><span style='color:#4338ca;'>■ Gross Revenue:</span> <b>₹%{y:,.2f}</b><extra></extra>"
     ))
+    # 2. Net Profit rendered as distinct Emerald Line with Diamond Markers
     fig.add_trace(go.Scatter(
         x=df["month_str"], y=df["profit"],
-        mode="lines+markers", name="Net Profit (₹)",
-        line=dict(color="#2ec4b6", width=2.5, dash="dash"),
-        marker=dict(size=6)
+        mode="lines+markers",
+        name="Net Profit (₹)",
+        customdata=df["margin_pct"],
+        line=dict(color="#10b981", width=3.5),
+        marker=dict(symbol="diamond", size=9, color="#059669", line=dict(color="#ffffff", width=2)),
+        hovertemplate="<b>%{x}</b><br><span style='color:#059669;'>◆ Net Operating Profit:</span> <b>₹%{y:,.2f}</b><br><span style='color:#047857;'>Operating Margin:</span> <b>%{customdata:.1f}%</b><extra></extra>"
     ))
     fig.update_layout(
-        title="Revenue & Net Profit Trend Over Time",
-        xaxis_title="Billing Month",
-        yaxis_title="Amount (₹ INR)",
+        title="Monthly Financial Trajectory: Gross Revenue (Columns) vs Net Profit (Line)",
+        xaxis_title="Billing Timeline",
+        yaxis=dict(title="Amount (₹ INR)", tickprefix="₹", tickformat=",.0f"),
         hovermode="x unified",
         template="plotly_white",
-        margin=dict(l=40, r=40, t=50, b=40),
+        margin=dict(l=55, r=40, t=55, b=45),
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
     )
     return json.loads(fig.to_json())
@@ -119,22 +130,44 @@ def build_regional_comparison_chart(category: str = None):
     with engine.connect() as conn:
         df = pd.read_sql(text(query), conn, params=params)
         
+    df["revenue"] = df["revenue"].astype(float)
+    df["profit"] = df["profit"].astype(float)
+    rev_labels = [f"₹{r/100000:.1f}L" if r >= 100000 else f"₹{r:,.0f}" for r in df["revenue"]]
+    prof_labels = [f"₹{p/100000:.1f}L" if p >= 100000 else f"₹{p:,.0f}" for p in df["profit"]]
+    
     fig = go.Figure()
+    # 1. Gross Revenue Grouped Bar with direct on-bar value labels
     fig.add_trace(go.Bar(
-        x=df["region"], y=df["revenue"], name="Revenue",
-        marker_color="#3a86ff"
+        x=df["region"], y=df["revenue"],
+        name="Revenue (₹)",
+        text=rev_labels,
+        textposition="outside",
+        marker=dict(
+            color="#4f46e5",
+            line=dict(color="#3730a3", width=1)
+        ),
+        hovertemplate="<b>%{x} Region</b><br><span style='color:#4f46e5;'>■ Gross Revenue:</span> <b>₹%{y:,.2f}</b><extra></extra>"
     ))
+    # 2. Net Profit Grouped Bar with distinct emerald color and on-bar value labels
     fig.add_trace(go.Bar(
-        x=df["region"], y=df["profit"], name="Profit",
-        marker_color="#06d6a0"
+        x=df["region"], y=df["profit"],
+        name="Net Profit (₹)",
+        text=prof_labels,
+        textposition="outside",
+        marker=dict(
+            color="#10b981",
+            line=dict(color="#047857", width=1)
+        ),
+        hovertemplate="<b>%{x} Region</b><br><span style='color:#10b981;'>■ Net Profit:</span> <b>₹%{y:,.2f}</b><extra></extra>"
     ))
     fig.update_layout(
         barmode="group",
-        title="Performance Across Geographic Sales Regions",
+        title="Geographic Commercial Breakdown: Revenue vs Profit (₹ INR)",
         xaxis_title="Geographic Region",
-        yaxis_title="Amount (₹ INR)",
+        yaxis=dict(title="Amount (₹ INR)", tickprefix="₹", tickformat=",.0f"),
         template="plotly_white",
-        margin=dict(l=40, r=40, t=50, b=40)
+        margin=dict(l=55, r=40, t=55, b=45),
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
     )
     return json.loads(fig.to_json())
 
