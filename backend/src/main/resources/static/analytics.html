@@ -1025,13 +1025,17 @@
   function renderCockpitRevenueFallback(containerId) {
     const months = ['2025-10', '2025-11', '2025-12', '2026-01', '2026-02', '2026-03'];
     const revenues = [680000, 740000, 920000, 810000, 890000, 1050000];
+    const revLabels = revenues.map(r => 'REV: ₹' + (r >= 100000 ? (r / 100000).toFixed(1) + 'L' : r.toLocaleString('en-IN')));
     const trace = {
       x: months,
       y: revenues,
       type: 'bar',
-      name: 'Revenue (₹)',
+      name: 'Gross Revenue (₹)',
+      text: revLabels,
+      textposition: 'inside',
+      textfont: { color: '#ffffff', size: 10, family: 'sans-serif' },
       marker: { color: 'rgba(79, 70, 229, 0.85)', line: { color: '#4338ca', width: 1.5 } },
-      hovertemplate: '<b>%{x}</b><br><span style="color:#4338ca;">■ Gross Revenue:</span> <b>₹%{y:,.2f}</b><extra></extra>'
+      hovertemplate: '<b>%{x}</b><br><span style="color:#4f46e5;">■ <b>GROSS REVENUE:</b></span> <b style="font-size:13px;">₹%{y:,.2f}</b><extra></extra>'
     };
     const layout = {
       title: '',
@@ -1048,17 +1052,21 @@
     const months = ['2025-10', '2025-11', '2025-12', '2026-01', '2026-02', '2026-03'];
     const profits = [460000, 510000, 640000, 560000, 620000, 735000];
     const margins = [67.6, 68.9, 69.6, 69.1, 69.7, 70.0];
+    const profLabels = profits.map(p => 'PROFIT: ₹' + (p >= 100000 ? (p / 100000).toFixed(1) + 'L' : p.toLocaleString('en-IN')));
     const trace = {
       x: months,
       y: profits,
-      mode: 'lines+markers',
+      mode: 'lines+markers+text',
       name: 'Net Profit (₹)',
+      text: profLabels,
+      textposition: 'top center',
+      textfont: { color: '#047857', size: 10, family: 'sans-serif' },
       customdata: margins,
       line: { color: '#10b981', width: 3 },
       marker: { symbol: 'diamond', size: 8, color: '#059669', line: { color: '#ffffff', width: 2 } },
       fill: 'tozeroy',
       fillcolor: 'rgba(16, 185, 129, 0.08)',
-      hovertemplate: '<b>%{x}</b><br><span style="color:#059669;">◆ Net Operating Profit:</span> <b>₹%{y:,.2f}</b><br><span style="color:#047857;">Operating Margin:</span> <b>%{customdata:.1f}%</b><extra></extra>'
+      hovertemplate: '<b>%{x}</b><br><span style="color:#059669;">◆ <b>NET PROFIT:</b></span> <b style="font-size:13px;">₹%{y:,.2f}</b><br><span style="color:#047857;">Operating Margin:</span> <b>%{customdata:.1f}%</b><extra></extra>'
     };
     const layout = {
       title: '',
@@ -1075,23 +1083,31 @@
     const regions = ['NORTH', 'SOUTH', 'EAST', 'WEST', 'CENTRAL'];
     const revenues = [3200000, 2500000, 1800000, 1200000, 820000];
     const profits = [2240000, 1750000, 1260000, 840000, 545000];
+    const revLabels = ['REV: ₹32.0L', 'REV: ₹25.0L', 'REV: ₹18.0L', 'REV: ₹12.0L', 'REV: ₹8.2L'];
+    const profLabels = ['PROFIT: ₹22.4L', 'PROFIT: ₹17.5L', 'PROFIT: ₹12.6L', 'PROFIT: ₹8.4L', 'PROFIT: ₹5.5L'];
 
     const traces = [
       {
         x: regions,
         y: revenues,
         type: 'bar',
-        name: 'Revenue (₹)',
+        name: 'Gross Revenue (₹)',
+        text: revLabels,
+        textposition: 'outside',
+        textfont: { color: '#3730a3', size: 9, family: 'sans-serif' },
         marker: { color: '#4f46e5', line: { color: '#3730a3', width: 1 } },
-        hovertemplate: '<b>%{x} Region</b><br><span style="color:#4f46e5;">■ Gross Revenue:</span> <b>₹%{y:,.2f}</b><extra></extra>'
+        hovertemplate: '<b>%{x} Region</b><br><span style="color:#4f46e5;">■ <b>GROSS REVENUE:</b></span> <b style="font-size:13px;">₹%{y:,.2f}</b><extra></extra>'
       },
       {
         x: regions,
         y: profits,
         type: 'bar',
         name: 'Net Profit (₹)',
+        text: profLabels,
+        textposition: 'outside',
+        textfont: { color: '#047857', size: 9, family: 'sans-serif' },
         marker: { color: '#10b981', line: { color: '#047857', width: 1 } },
-        hovertemplate: '<b>%{x} Region</b><br><span style="color:#10b981;">■ Net Profit:</span> <b>₹%{y:,.2f}</b><extra></extra>'
+        hovertemplate: '<b>%{x} Region</b><br><span style="color:#059669;">■ <b>NET PROFIT:</b></span> <b style="font-size:13px;">₹%{y:,.2f}</b><extra></extra>'
       }
     ];
 

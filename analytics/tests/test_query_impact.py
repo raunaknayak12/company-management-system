@@ -6,11 +6,18 @@ KPI metrics and Plotly charts, and verifies the INR currency system.
 
 import pandas as pd
 from sqlalchemy import text
-from app.db import engine
-from app.charts.plotly_builder import (
-    build_sales_trend_chart,
-    build_regional_comparison_chart,
-)
+try:
+    from app.db import engine
+    from app.charts.plotly_builder import (
+        build_sales_trend_chart,
+        build_regional_comparison_chart,
+    )
+except ImportError:
+    from analytics.app.db import engine
+    from analytics.app.charts.plotly_builder import (
+        build_sales_trend_chart,
+        build_regional_comparison_chart,
+    )
 
 
 def test_query_status_filter_impact_on_kpis() -> None:

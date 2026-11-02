@@ -134,6 +134,9 @@ def build_sales_trend_chart(region: str = None, category: str = None, metric: st
         fig.add_trace(go.Bar(
             x=df["month_str"], y=df["revenue"],
             name="Gross Revenue (₹)",
+            text=rev_labels,
+            textposition="auto",
+            textfont=dict(color="#ffffff", size=9, family="sans-serif"),
             marker=dict(
                 color="rgba(79, 70, 229, 0.85)",
                 line=dict(color="#4338ca", width=1)
@@ -145,8 +148,11 @@ def build_sales_trend_chart(region: str = None, category: str = None, metric: st
         # 2. Net Profit rendered as Emerald Line with Diamond Markers
         profit_kwargs = dict(
             x=df["month_str"], y=df["profit"],
-            mode="lines+markers",
+            mode="lines+markers+text",
             name="Net Profit (₹)",
+            text=prof_labels,
+            textposition="top center",
+            textfont=dict(color="#047857", size=9, family="sans-serif"),
             yaxis="y2" if metric_lower == "all" else "y",
             customdata=df["margin_pct"],
             line=dict(color="#10b981", width=3),
@@ -208,6 +214,9 @@ def build_regional_comparison_chart(category: str = None):
     fig.add_trace(go.Bar(
         x=df["region"], y=df["revenue"],
         name="Gross Revenue (₹)",
+        text=rev_labels,
+        textposition="outside",
+        textfont=dict(color="#3730a3", size=9, family="sans-serif"),
         marker=dict(
             color="#4f46e5",
             line=dict(color="#3730a3", width=1)
@@ -218,6 +227,9 @@ def build_regional_comparison_chart(category: str = None):
     fig.add_trace(go.Bar(
         x=df["region"], y=df["profit"],
         name="Net Profit (₹)",
+        text=prof_labels,
+        textposition="outside",
+        textfont=dict(color="#047857", size=9, family="sans-serif"),
         marker=dict(
             color="#10b981",
             line=dict(color="#047857", width=1)
